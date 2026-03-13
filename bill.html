@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bill Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--surface:rgba(255,255,255,.9);--text:#163328;--muted:#6a7f74;--line:rgba(18,54,41,.1);--primary:#1f7a5a;--primary-strong:#14543d;--primary-soft:#dff2ea;--danger:#c84f4f;--sidebar-width:272px;--radius:24px;--shadow:0 24px 60px rgba(18,54,41,.1)}
+    body{font-family:Manrope,sans-serif;background:radial-gradient(circle at top left,rgba(112,191,154,.18),transparent 26%),linear-gradient(180deg,#eef5ea 0%,#f9fbf8 100%);color:var(--text);min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);background:linear-gradient(180deg,#1a4a3a 0%,#0a1f17 100%);color:#fff;padding:24px 18px;display:flex;flex-direction:column;gap:18px;z-index:20}
+    .brand,.card,.metric,.modal-box{border-radius:var(--radius)}
+    .brand{display:flex;gap:12px;align-items:center;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+    .mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f4fffb,#9fe1c0);color:var(--primary-strong);display:grid;place-items:center;font-weight:800}
+    .nav-item{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;color:rgba(255,255,255,.82);transition:.2s ease}
+    button.nav-item{width:100%;border:0;background:transparent;cursor:pointer;font:inherit;text-align:left}
+    .nav-item:hover,.nav-item.active{background:rgba(255,255,255,.1);color:#fff}
+    .nav-icon{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.08);display:grid;place-items:center;flex-shrink:0}
+    .main{margin-left:var(--sidebar-width);padding:28px;min-height:100vh}
+    .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:24px}
+    .top h1{font-family:"Instrument Serif",serif;font-size:clamp(2.3rem,5vw,3.6rem);line-height:.95;font-weight:400}
+    .top p{margin-top:10px;color:var(--muted);max-width:720px}
+    .button{border:0;border-radius:16px;padding:13px 16px;font:inherit;font-weight:700;cursor:pointer}
+    .button.primary{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-strong) 100%);color:#fff}
+    .button.dark{background:#1f3d31;color:#fff}
+    .button.ghost{background:#f4f7f5;color:var(--text)}
+    .button.danger{background:linear-gradient(135deg,#d45b5b 0%,#b93c3c 100%);color:#fff}
+    .summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+    .metric,.card{background:var(--surface);border:1px solid rgba(255,255,255,.72);box-shadow:var(--shadow)}
+    .metric{padding:18px}
+    .metric span,.muted{color:var(--muted)}
+    .metric strong{display:block;font-size:30px;margin-top:16px}
+    .card{padding:24px;margin-bottom:22px}
+    .head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px}
+    .head h3{font-size:22px}
+    .badge{display:inline-flex;padding:8px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary-strong);font-size:12px;font-weight:700}
+    .filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .field label{display:block;margin-bottom:8px;font-size:13px;font-weight:700}
+    .field-select{width:100%;padding:14px 16px;border-radius:16px;border:1px solid rgba(18,54,41,.14);background:#fbfdfc;font:inherit}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:20px;background:#fff}
+    table{width:100%;border-collapse:collapse;min-width:1280px}
+    th,td{padding:16px 18px;text-align:left;border-bottom:1px solid rgba(18,54,41,.08);vertical-align:middle}
+    th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#f9fcfa}
+    tbody tr:hover{background:rgba(31,122,90,.03)}
+    .status-select{padding:10px 12px;border-radius:12px;border:1px solid rgba(18,54,41,.14);background:#fbfdfc;font:inherit}
+    .row-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .action-link{border:0;background:transparent;color:var(--primary);font:inherit;font-weight:700;cursor:pointer}
+    .empty{border:1px dashed rgba(18,54,41,.2);border-radius:22px;padding:28px;text-align:center;color:var(--muted);background:rgba(255,255,255,.52)}
+    .overlay,.modal{position:fixed;inset:0}
+    .overlay{background:rgba(3,12,8,.42);display:none;z-index:21}
+    .overlay.show{display:block}
+    .modal{background:rgba(5,18,12,.52);display:none;align-items:center;justify-content:center;padding:20px;z-index:22}
+    .modal.show{display:flex}
+    .modal-box{width:min(100%,760px);background:#fff;padding:24px}
+    .modal-top{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px}
+    .close{width:40px;height:40px;border-radius:14px;background:#f5f8f6;border:0;font:inherit;cursor:pointer}
+    .bill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    .bill-item{padding:16px;border-radius:18px;border:1px solid var(--line);background:#fbfdfc}
+    .bill-item strong{display:block;margin-top:8px;font-size:18px}
+    .notice{padding:14px 16px;border-radius:16px;margin-bottom:16px;display:none}
+    .notice.show{display:block}
+    .notice.success{background:#e7f7ef;color:#16653f}
+    .notice.error{background:#fceceb;color:#a33f3f}
+    @media (max-width:1100px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:980px){.sidebar{position:static;width:100%}.main{margin-left:0;padding:18px}.summary-row{grid-template-columns:1fr}}
+    @media (max-width:700px){.top{flex-direction:column}.filters,.bill-grid{grid-template-columns:1fr}.row-actions{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">M</div>
+      <div>
+        <strong>MilkMate</strong>
+        <div class="muted" style="color:rgba(220,244,234,.68);font-size:13px;margin-top:3px">Admin control center</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-item" type="button" onclick="window.location.href='Milk types.html'"><div class="nav-icon">M</div><div>Milk Types<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Inventory and pricing</div></div></button>
+      <button class="nav-item" type="button" onclick="window.location.href='building.html'"><div class="nav-icon">B</div><div>Buildings<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Societies and delivery zones</div></div></button>
+      <button class="nav-item" type="button" onclick="window.location.href='cust.html'"><div class="nav-icon">C</div><div>Customers<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Subscriber records</div></div></button>
+      <button class="nav-item" type="button" onclick="window.location.href='del.html'"><div class="nav-icon">D</div><div>Delivery Table<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Route and quantity control</div></div></button>
+      <button class="nav-item" type="button" onclick="window.location.href='tomorrow-demand.html'"><div class="nav-icon">T</div><div>Tomorrow Demand<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Forecasted orders</div></div></button>
+      <button class="nav-item active" type="button"><div class="nav-icon">$</div><div>Bill Generator<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Monthly invoicing</div></div></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1>Bill Generator</h1>
+        <p>Generate monthly milk bills from saved delivery records, milk prices, and building delivery charges for each customer.</p>
+      </div>
+    </div>
+
+    <section class="summary-row">
+      <div class="metric"><span>Total Bills</span><strong id="billCount">0</strong><small class="muted">Customers in the selected view</small></div>
+      <div class="metric"><span>Total Liters</span><strong id="billLiters">0.0</strong><small class="muted">Across the selected month</small></div>
+      <div class="metric"><span>Total Amount</span><strong id="billAmount">Rs 0.00</strong><small class="muted">Milk cost plus delivery charges</small></div>
+    </section>
+
+    <div class="notice" id="notice"></div>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <h3>Bill Filters</h3>
+          <p class="muted" style="margin-top:6px">Choose a billing period and building, then generate monthly bills from the delivery table records.</p>
+        </div>
+        <div class="badge">Monthly billing</div>
+      </div>
+
+      <div class="filters">
+        <div class="field">
+          <label for="yearFilter">Year</label>
+          <select id="yearFilter" class="field-select"></select>
+        </div>
+        <div class="field">
+          <label for="monthFilter">Month</label>
+          <select id="monthFilter" class="field-select"></select>
+        </div>
+        <div class="field">
+          <label for="buildingFilter">Building</label>
+          <select id="buildingFilter" class="field-select"></select>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <button type="button" class="button primary" id="generateBillsButton" style="width:100%">Generate Bills</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <h3>Bill Table</h3>
+          <p class="muted" style="margin-top:6px">Each row is a customer bill for the selected month. Payment status is saved in browser storage.</p>
+        </div>
+      </div>
+      <div id="billTableWrap"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="billModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <div>
+          <h4>Customer Bill</h4>
+          <p class="muted" style="margin-top:8px">Detailed monthly bill for the selected customer.</p>
+        </div>
+        <button type="button" class="close" data-close-modal>&times;</button>
+      </div>
+      <div id="billModalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const BUILDING_STORAGE_KEY='milkmate_buildings';
+    const CUSTOMER_STORAGE_KEYS=['milkmate-customers','milkmate_customers'];
+    const MILK_TYPES_STORAGE_KEY='milkmate-milk-types';
+    const DELIVERY_STORAGE_KEY='milkmate-delivery-records';
+    const BILL_STATUS_STORAGE_KEY='milkmate-bill-statuses';
+    const BILL_STORAGE_KEY='bills';
+    const USER_STORAGE_KEY='milkmate-users';
+    const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    let latestBills=[];
+
+    function escapeHtml(value){
+      return String(value)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
+
+    function formatMoney(value){
+      return 'Rs '+Number(value||0).toFixed(2);
+    }
+
+    function showNotice(message,type){
+      const notice=document.getElementById('notice');
+      notice.textContent=message;
+      notice.className='notice show '+type;
+      clearTimeout(showNotice.timeoutId);
+      showNotice.timeoutId=setTimeout(function(){notice.className='notice';},2600);
+    }
+
+    function getBuildings(){
+      return JSON.parse(localStorage.getItem(BUILDING_STORAGE_KEY)||'[]');
+    }
+
+    function getCustomers(){
+      let data=[];
+      CUSTOMER_STORAGE_KEYS.some(function(key){
+        const raw=localStorage.getItem(key);
+        if(raw){data=JSON.parse(raw);return true;}
+        return false;
+      });
+      return data;
+    }
+
+    function getMilkTypes(){
+      return JSON.parse(localStorage.getItem(MILK_TYPES_STORAGE_KEY)||'[]');
+    }
+
+    function getDeliveryRecords(){
+      return JSON.parse(localStorage.getItem(DELIVERY_STORAGE_KEY)||'[]');
+    }
+
+    function getBillStatuses(){
+      return JSON.parse(localStorage.getItem(BILL_STATUS_STORAGE_KEY)||'{}');
+    }
+
+    function saveBillStatuses(statuses){
+      localStorage.setItem(BILL_STATUS_STORAGE_KEY,JSON.stringify(statuses));
+    }
+
+    function getSavedBills(){
+      return JSON.parse(localStorage.getItem(BILL_STORAGE_KEY)||'[]');
+    }
+
+    function saveGeneratedBills(bills){
+      const savedBills=getSavedBills();
+      const latestKeys=bills.map(function(bill){
+        return [bill.customerId,bill.year,bill.month].join('__');
+      });
+      const preservedBills=savedBills.filter(function(bill){
+        return latestKeys.indexOf([bill.customerId,bill.year,bill.month].join('__'))===-1;
+      });
+      const customerBills=bills.map(function(bill){
+        return {
+          id:[bill.customerId,bill.year,bill.month].join('__'),
+          customerId:bill.customerId,
+          accountUserId:bill.accountUserId||'',
+          customerName:bill.customerName,
+          month:bill.month+' '+bill.year,
+          monthName:bill.month,
+          year:bill.year,
+          totalLiters:bill.totalLiters,
+          pricePerLiter:bill.pricePerLiter,
+          deliveryCharge:bill.deliveryCharge,
+          totalAmount:bill.totalAmount,
+          pdfPath:'',
+          status:bill.paymentStatus,
+          building:bill.building,
+          milkType:bill.milkType,
+          flatNumber:bill.flatNumber,
+          records:bill.records
+        };
+      });
+      localStorage.setItem(BILL_STORAGE_KEY,JSON.stringify(preservedBills.concat(customerBills)));
+    }
+
+    function getUsers(){
+      return JSON.parse(localStorage.getItem(USER_STORAGE_KEY)||'[]');
+    }
+
+    function normalizeText(value){
+      return String(value||'').trim().toLowerCase();
+    }
+
+    function normalizePhone(value){
+      return String(value||'').replace(/\D/g,'');
+    }
+
+    function findLinkedUserId(customer){
+      if(customer.accountUserId){return String(customer.accountUserId);}
+      const users=getUsers().filter(function(user){
+        return user.type==='user';
+      });
+      const customerPhone=normalizePhone(customer.phoneNumber||customer.phone);
+      const customerName=normalizeText(customer.customerName||customer.name);
+      const customerUsername=normalizeText(customer.username);
+      const match=users.find(function(user){
+        const samePhone=customerPhone && normalizePhone(user.phone)===customerPhone;
+        const sameName=customerName && normalizeText(user.name)===customerName;
+        const sameUsername=customerUsername && normalizeText(user.username)===customerUsername;
+        return samePhone || sameName || sameUsername;
+      });
+      return match ? String(match.id) : '';
+    }
+
+    function currentFilters(){
+      return{
+        year:document.getElementById('yearFilter').value,
+        month:document.getElementById('monthFilter').value,
+        building:document.getElementById('buildingFilter').value
+      };
+    }
+
+    function statusKey(customerId,year,month){
+      return [customerId,year,month].join('__');
+    }
+
+    function milkPriceForType(name){
+      const match=getMilkTypes().find(function(item){
+        return (item.name||item).toLowerCase()===String(name||'').toLowerCase();
+      });
+      return Number(match&&match.price?match.price:0);
+    }
+
+    function deliveryChargeForBuilding(name){
+      const match=getBuildings().find(function(item){
+        return item.name.toLowerCase()===String(name||'').toLowerCase();
+      });
+      return Number(match&&match.deliveryCharge?match.deliveryCharge:0);
+    }
+
+    function populateFilters(){
+      const yearFilter=document.getElementById('yearFilter');
+      const monthFilter=document.getElementById('monthFilter');
+      const buildingFilter=document.getElementById('buildingFilter');
+      const currentYear=String(new Date().getFullYear());
+      const selectedYear=yearFilter.value||currentYear;
+      const selectedMonth=monthFilter.value||monthNames[new Date().getMonth()];
+      const selectedBuilding=buildingFilter.value||'';
+
+      const years=[];
+      for(let year=2024;year<=2030;year+=1){years.push(String(year));}
+
+      yearFilter.innerHTML=years.map(function(year){return '<option value="'+year+'">'+year+'</option>';}).join('');
+      monthFilter.innerHTML=monthNames.map(function(month){return '<option value="'+month+'">'+month+'</option>';}).join('');
+      buildingFilter.innerHTML='<option value="">All Buildings</option>'+getBuildings().map(function(building){
+        return '<option value="'+escapeHtml(building.name)+'">'+escapeHtml(building.name)+'</option>';
+      }).join('');
+
+      yearFilter.value=years.indexOf(selectedYear)!==-1?selectedYear:currentYear;
+      monthFilter.value=monthNames.indexOf(selectedMonth)!==-1?selectedMonth:monthNames[new Date().getMonth()];
+      buildingFilter.value=getBuildings().some(function(building){return building.name===selectedBuilding;})?selectedBuilding:'';
+    }
+
+    function generateBills(){
+      const filters=currentFilters();
+      const statuses=getBillStatuses();
+      const bills=getCustomers().filter(function(customer){
+        return !filters.building || customer.building===filters.building;
+      }).map(function(customer){
+        const monthRecords=getDeliveryRecords().filter(function(record){
+          return record.customerId===customer.id &&
+            String(record.year)===filters.year &&
+            record.month===filters.month;
+        });
+
+        const totalLiters=monthRecords.reduce(function(total,record){
+          return total+
+            Number(record.day1||0)+
+            Number(record.day2||0)+
+            Number(record.day3||0)+
+            Number(record.day4||0)+
+            Number(record.day5||0)+
+            Number(record.day6||0)+
+            Number(record.day7||0);
+        },0);
+
+        const pricePerLiter=milkPriceForType(customer.milkType);
+        const deliveryCharge=deliveryChargeForBuilding(customer.building);
+        const milkCost=totalLiters*pricePerLiter;
+        const totalAmount=milkCost+deliveryCharge;
+
+        return{
+          customerId:customer.id,
+          accountUserId:findLinkedUserId(customer),
+          customerName:customer.customerName,
+          flatNumber:customer.flatNumber,
+          building:customer.building,
+          milkType:customer.milkType,
+          totalLiters:totalLiters,
+          pricePerLiter:pricePerLiter,
+          deliveryCharge:deliveryCharge,
+          totalAmount:totalAmount,
+          paymentStatus:statuses[statusKey(customer.id,filters.year,filters.month)]||'Pending',
+          year:filters.year,
+          month:filters.month,
+          records:monthRecords
+        };
+      }).filter(function(bill){
+        return bill.totalLiters>0;
+      });
+
+      latestBills=bills.sort(function(a,b){return a.customerName.localeCompare(b.customerName);});
+      saveGeneratedBills(latestBills);
+      renderBills();
+      showNotice('Bills generated successfully.','success');
+    }
+
+    function renderBills(){
+      const wrap=document.getElementById('billTableWrap');
+      const totalLiters=latestBills.reduce(function(total,bill){return total+bill.totalLiters;},0);
+      const totalAmount=latestBills.reduce(function(total,bill){return total+bill.totalAmount;},0);
+      document.getElementById('billCount').textContent=latestBills.length;
+      document.getElementById('billLiters').textContent=totalLiters.toFixed(1);
+      document.getElementById('billAmount').textContent=formatMoney(totalAmount);
+
+      if(!latestBills.length){
+        wrap.innerHTML='<div class="empty">No delivery records were found for the selected month and year.</div>';
+        return;
+      }
+
+      wrap.innerHTML='<div class="table-wrap"><table><thead><tr><th>Customer Name</th><th>Building</th><th>Milk Type</th><th>Total Liters</th><th>Price Per Liter</th><th>Delivery Charge</th><th>Total Amount</th><th>Payment Status</th><th>Actions</th></tr></thead><tbody>'+
+        latestBills.map(function(bill){
+          return '<tr>'+
+            '<td>'+escapeHtml(bill.customerName)+'</td>'+
+            '<td>'+escapeHtml(bill.building)+'</td>'+
+            '<td>'+escapeHtml(bill.milkType)+'</td>'+
+            '<td>'+bill.totalLiters.toFixed(1)+' L</td>'+
+            '<td>'+formatMoney(bill.pricePerLiter)+'</td>'+
+            '<td>'+formatMoney(bill.deliveryCharge)+'</td>'+
+            '<td>'+formatMoney(bill.totalAmount)+'</td>'+
+            '<td><select class="status-select" data-status-id="'+escapeHtml(bill.customerId)+'"><option value="Pending"'+(bill.paymentStatus==='Pending'?' selected':'')+'>Pending</option><option value="Paid"'+(bill.paymentStatus==='Paid'?' selected':'')+'>Paid</option></select></td>'+
+            '<td><div class="row-actions"><button class="action-link" type="button" onclick="viewBill(\''+bill.customerId+'\')">View Bill</button><button class="action-link" type="button" onclick="downloadBillPdf(\''+bill.customerId+'\')">Download PDF</button></div></td>'+
+          '</tr>';
+        }).join('')+
+        '</tbody></table></div>';
+
+      document.querySelectorAll('[data-status-id]').forEach(function(select){
+        select.addEventListener('change',function(event){
+          const customerId=event.target.dataset.statusId;
+          updateBillStatus(customerId,event.target.value);
+        });
+      });
+    }
+
+    function updateBillStatus(customerId,status){
+      const bill=latestBills.find(function(item){return item.customerId===customerId;});
+      if(!bill){return;}
+      const statuses=getBillStatuses();
+      statuses[statusKey(customerId,bill.year,bill.month)]=status;
+      saveBillStatuses(statuses);
+      latestBills=latestBills.map(function(item){
+        return item.customerId===customerId?Object.assign({},item,{paymentStatus:status}):item;
+      });
+      saveGeneratedBills(latestBills);
+      renderBills();
+      showNotice('Payment status updated successfully.','success');
+    }
+
+    function openModal(){
+      document.getElementById('billModal').classList.add('show');
+      document.getElementById('overlay').classList.add('show');
+    }
+
+    function closeModals(){
+      document.getElementById('billModal').classList.remove('show');
+      document.getElementById('overlay').classList.remove('show');
+    }
+
+    function viewBill(customerId){
+      const bill=latestBills.find(function(item){return item.customerId===customerId;});
+      if(!bill){return;}
+      document.getElementById('billModalContent').innerHTML=
+        '<div class="bill-grid">'+
+          '<div class="bill-item"><span class="muted">Customer Name</span><strong>'+escapeHtml(bill.customerName)+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Flat Number</span><strong>'+escapeHtml(bill.flatNumber||'-')+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Building</span><strong>'+escapeHtml(bill.building)+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Milk Type</span><strong>'+escapeHtml(bill.milkType)+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Billing Month</span><strong>'+escapeHtml(bill.month+' '+bill.year)+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Payment Status</span><strong>'+escapeHtml(bill.paymentStatus)+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Total Liters</span><strong>'+bill.totalLiters.toFixed(1)+' L</strong></div>'+
+          '<div class="bill-item"><span class="muted">Price Per Liter</span><strong>'+formatMoney(bill.pricePerLiter)+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Delivery Charge</span><strong>'+formatMoney(bill.deliveryCharge)+'</strong></div>'+
+          '<div class="bill-item"><span class="muted">Total Amount</span><strong>'+formatMoney(bill.totalAmount)+'</strong></div>'+
+        '</div>'+
+        '<div class="table-wrap"><table><thead><tr><th>Week</th><th>Total Liters in Week</th></tr></thead><tbody>'+
+          (bill.records.length?bill.records.map(function(record){
+            const weekTotal=Number(record.day1||0)+Number(record.day2||0)+Number(record.day3||0)+Number(record.day4||0)+Number(record.day5||0)+Number(record.day6||0)+Number(record.day7||0);
+            return '<tr><td>Week '+escapeHtml(record.week)+'</td><td>'+weekTotal.toFixed(1)+' L</td></tr>';
+          }).join(''):'<tr><td colspan="2">No weekly records found.</td></tr>')+
+        '</tbody></table></div>';
+      openModal();
+    }
+
+    function downloadBillPdf(customerId){
+      const bill=latestBills.find(function(item){return item.customerId===customerId;});
+      if(!bill){return;}
+      const printWindow=window.open('','_blank','width=900,height=700');
+      if(!printWindow){
+        showNotice('Please allow popups to download the bill.','error');
+        return;
+      }
+      printWindow.document.write('<html><head><title>Bill - '+escapeHtml(bill.customerName)+'</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#163328}h1{margin-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #d8e5dd;padding:12px;text-align:left}th{background:#f4f8f5}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}.box{border:1px solid #d8e5dd;padding:14px;border-radius:12px}</style></head><body>');
+      printWindow.document.write('<h1>MilkMate Bill</h1><p>'+escapeHtml(bill.month+' '+bill.year)+'</p>');
+      printWindow.document.write('<div class="grid"><div class="box"><strong>Customer Name</strong><div>'+escapeHtml(bill.customerName)+'</div></div><div class="box"><strong>Building</strong><div>'+escapeHtml(bill.building)+'</div></div><div class="box"><strong>Milk Type</strong><div>'+escapeHtml(bill.milkType)+'</div></div><div class="box"><strong>Payment Status</strong><div>'+escapeHtml(bill.paymentStatus)+'</div></div><div class="box"><strong>Total Liters</strong><div>'+bill.totalLiters.toFixed(1)+' L</div></div><div class="box"><strong>Total Amount</strong><div>'+formatMoney(bill.totalAmount)+'</div></div></div>');
+      printWindow.document.write('<table><thead><tr><th>Total Liters</th><th>Price Per Liter</th><th>Delivery Charge</th><th>Total Amount</th></tr></thead><tbody><tr><td>'+bill.totalLiters.toFixed(1)+' L</td><td>'+formatMoney(bill.pricePerLiter)+'</td><td>'+formatMoney(bill.deliveryCharge)+'</td><td>'+formatMoney(bill.totalAmount)+'</td></tr></tbody></table>');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    }
+
+    document.getElementById('generateBillsButton').addEventListener('click',generateBills);
+    document.querySelectorAll('[data-close-modal]').forEach(function(button){
+      button.addEventListener('click',closeModals);
+    });
+    document.getElementById('overlay').addEventListener('click',closeModals);
+    document.getElementById('billModal').addEventListener('click',function(event){
+      if(event.target===event.currentTarget){closeModals();}
+    });
+
+    populateFilters();
+    generateBills();
+  </script>
+</body>
+</html>
