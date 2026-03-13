@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --surface: rgba(255,255,255,.9);
+      --text: #163328;
+      --muted: #6a7f74;
+      --line: rgba(18,54,41,.1);
+      --primary: #1f7a5a;
+      --primary-strong: #14543d;
+      --primary-soft: #dff2ea;
+      --danger: #c84f4f;
+      --sidebar-width: 272px;
+      --radius: 24px;
+      --shadow: 0 24px 60px rgba(18,54,41,.1);
+    }
+    body {
+      font-family: Manrope, sans-serif;
+      background: radial-gradient(circle at top left, rgba(112,191,154,.18), transparent 26%), linear-gradient(180deg, #eef5ea 0%, #f9fbf8 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #1a4a3a 0%, #0a1f17 100%);
+      color: #fff;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 20;
+    }
+    .brand, .card, .modal-box {
+      border-radius: var(--radius);
+    }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f4fffb, #9fe1c0);
+      color: var(--primary-strong);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .nav-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 18px;
+      color: rgba(255,255,255,.82);
+      transition: .2s ease;
+    }
+    button.nav-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,.1);
+      color: #fff;
+    }
+    .nav-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .main {
+      margin-left: var(--sidebar-width);
+      padding: 28px;
+      min-height: 100vh;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .top h1 {
+      font-family: "Instrument Serif", serif;
+      font-size: clamp(2.3rem, 5vw, 3.6rem);
+      line-height: .95;
+      font-weight: 400;
+    }
+    .top p {
+      margin-top: 10px;
+      color: var(--muted);
+      max-width: 720px;
+    }
+    .button {
+      border: 0;
+      border-radius: 16px;
+      padding: 13px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .button.primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%); color: #fff; }
+    .button.dark { background: #1f3d31; color: #fff; }
+    .button.danger { background: linear-gradient(135deg, #d45b5b 0%, #b93c3c 100%); color: #fff; }
+    .button.ghost { background: #f4f7f5; color: var(--text); }
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .summary-card, .card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: var(--shadow);
+    }
+    .summary-card {
+      padding: 18px;
+      border-radius: 20px;
+    }
+    .summary-card span, .muted { color: var(--muted); }
+    .summary-card strong {
+      display: block;
+      font-size: 30px;
+      margin-top: 16px;
+    }
+    .card {
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+    .head h3 { font-size: 22px; }
+    .badge {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .toolbar, .filters {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .toolbar { margin-bottom: 18px; }
+    .filters { margin-bottom: 16px; }
+    .field-input, .field-select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(18,54,41,.14);
+      background: #fbfdfc;
+      font: inherit;
+    }
+    .search-box {
+      flex: 1 1 320px;
+    }
+    .filter-box {
+      flex: 1 1 220px;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1080px;
+    }
+    th, td {
+      padding: 16px 18px;
+      text-align: left;
+      border-bottom: 1px solid rgba(18,54,41,.08);
+      vertical-align: middle;
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      background: #f9fcfa;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #e7f7ef;
+      color: #16653f;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #28a745;
+    }
+    .row-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .action-link {
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .action-link.delete { color: var(--danger); }
+    .empty {
+      border: 1px dashed rgba(18,54,41,.2);
+      border-radius: 22px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,.52);
+    }
+    .notice {
+      padding: 14px 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .notice.show { display: block; }
+    .notice.success { background: #e7f7ef; color: #16653f; }
+    .notice.error { background: #fceceb; color: #a33f3f; }
+    .overlay, .modal {
+      position: fixed;
+      inset: 0;
+    }
+    .overlay {
+      background: rgba(3,12,8,.42);
+      display: none;
+      z-index: 21;
+    }
+    .overlay.show { display: block; }
+    .modal {
+      background: rgba(5,18,12,.52);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 22;
+    }
+    .modal.show { display: flex; }
+    .modal-box {
+      width: min(100%, 560px);
+      background: #fff;
+      padding: 24px;
+    }
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .close {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: #f5f8f6;
+    }
+    .form {
+      display: grid;
+      gap: 16px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .field.full {
+      grid-column: 1 / -1;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .confirm-copy {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 980px) {
+      .sidebar { position: static; width: 100%; }
+      .main { margin-left: 0; padding: 18px; }
+      .summary-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .top { flex-direction: column; }
+      .toolbar, .filters, .form-actions { flex-direction: column; }
+      .button { width: 100%; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">M</div>
+      <div>
+        <strong>MilkMate</strong>
+        <div class="muted" style="color:rgba(220,244,234,.68);font-size:13px;margin-top:3px">Admin control center</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-item" type="button" onclick="window.location.href='Milk types.html'">
+        <div class="nav-icon">M</div>
+        <div>Milk Types<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Inventory and pricing</div></div>
+      </button>
+      <button class="nav-item" type="button" onclick="window.location.href='building.html'">
+        <div class="nav-icon">B</div>
+        <div>Buildings<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Societies and delivery zones</div></div>
+      </button>
+      <button class="nav-item active" type="button">
+        <div class="nav-icon">C</div>
+        <div>Customers<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Subscriber records</div></div>
+      </button>
+      <button class="nav-item" type="button" onclick="window.location.href='del.html'"><div class="nav-icon">D</div><div>Delivery Table<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Route and quantity control</div></div></button>
+      <button class="nav-item" type="button" onclick="window.location.href='tomorrow-demand.html'"><div class="nav-icon">T</div><div>Tomorrow Demand<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Forecasted orders</div></div></button>
+      <div class="nav-item"><div class="nav-icon">$</div><div>Bill Generator<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Monthly invoicing</div></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1>Customers Management</h1>
+        <p>Manage subscribers, assign milk plans, connect each customer to a building, and keep the delivery roster ready for downstream modules.</p>
+      </div>
+    </div>
+
+    <section class="summary-row">
+      <div class="summary-card"><span>Total Customers</span><strong id="customers-count">0</strong><small class="muted">Registered subscribers</small></div>
+      <div class="summary-card"><span>Active Customers</span><strong id="active-count">0</strong><small class="muted">Currently receiving milk</small></div>
+      <div class="summary-card"><span>Buildings Covered</span><strong id="building-count">0</strong><small class="muted">Unique mapped buildings</small></div>
+    </section>
+
+    <div class="notice" id="notice"></div>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <h3>Customers Management</h3>
+          <p class="muted" style="margin-top:6px">Add, search, filter, edit, and delete customer records from one responsive admin table.</p>
+        </div>
+        <div class="badge">Customer records</div>
+      </div>
+
+      <div class="toolbar">
+        <button type="button" class="button primary" id="openAddCustomer">Add Customer</button>
+        <button type="button" class="button dark" id="focusSearch">Search Customer</button>
+        <button type="button" class="button ghost" id="focusFilters">Filter Customers</button>
+      </div>
+
+      <div class="filters" id="filtersArea">
+        <div class="search-box">
+          <input id="searchInput" class="field-input" type="text" placeholder="Search by customer name, phone number, or flat number">
+        </div>
+        <div class="filter-box">
+          <select id="buildingFilter" class="field-select">
+            <option value="">Filter by Building</option>
+          </select>
+        </div>
+        <div class="filter-box">
+          <select id="milkTypeFilter" class="field-select">
+            <option value="">Filter by Milk Type</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="customersTableWrap"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="customerModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <div>
+          <h4 id="customerModalTitle">Add Customer</h4>
+          <p class="muted" style="margin-top:8px">Capture customer information and link the record to buildings and milk types.</p>
+        </div>
+        <button type="button" class="close" data-close-modal>&times;</button>
+      </div>
+      <form class="form" id="customerForm">
+        <input type="hidden" id="customerId">
+        <div class="form-grid">
+          <div class="field">
+            <label for="customerName">Customer Name</label>
+            <input id="customerName" class="field-input" type="text" required>
+          </div>
+          <div class="field">
+            <label for="phoneNumber">Phone Number</label>
+            <input id="phoneNumber" class="field-input" type="number" required>
+          </div>
+          <div class="field">
+            <label for="buildingName">Building Name</label>
+            <select id="buildingName" class="field-select" required></select>
+          </div>
+          <div class="field">
+            <label for="flatNumber">Flat Number</label>
+            <input id="flatNumber" class="field-input" type="text" required>
+          </div>
+          <div class="field">
+            <label for="milkType">Milk Type</label>
+            <select id="milkType" class="field-select" required></select>
+          </div>
+          <div class="field">
+            <label for="defaultQuantity">Default Milk Quantity (Liters)</label>
+            <input id="defaultQuantity" class="field-input" type="number" min="0.1" step="0.1" required>
+          </div>
+          <div class="field">
+            <label for="startDate">Delivery Start Date</label>
+            <input id="startDate" class="field-input" type="date" required>
+          </div>
+          <div class="field">
+            <label for="customerStatus">Status</label>
+            <select id="customerStatus" class="field-select" required>
+              <option value="Active">Active</option>
+              <option value="Paused">Paused</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="button ghost" data-close-modal>Cancel</button>
+          <button type="submit" class="button primary" id="saveCustomerButton">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="deleteModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <div>
+          <h4>Delete Customer</h4>
+          <p class="muted" style="margin-top:8px">This action will remove the selected customer record.</p>
+        </div>
+        <button type="button" class="close" data-close-modal>&times;</button>
+      </div>
+      <p class="confirm-copy">Are you sure you want to delete this customer?</p>
+      <div class="form-actions">
+        <button type="button" class="button ghost" data-close-modal>Cancel</button>
+        <button type="button" class="button danger" id="confirmDeleteButton">Confirm Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CUSTOMER_STORAGE_KEY = 'milkmate-customers';
+    const BUILDING_STORAGE_KEY = 'milkmate_buildings';
+    const MILK_TYPES_STORAGE_KEY = 'milkmate-milk-types';
+
+    const defaultBuildings = [
+      { id: 1, name: 'Rohija', deliveryCharge: 25 },
+      { id: 2, name: 'Sai Darshan', deliveryCharge: 30 },
+      { id: 3, name: 'Om Residency', deliveryCharge: 20 }
+    ];
+
+    const defaultMilkTypes = [
+      { id: 'gokul-special', name: 'Gokul Special', price: 36 },
+      { id: 'cow-milk', name: 'Cow Milk', price: 34 },
+      { id: 'buffalo-milk', name: 'Buffalo Milk', price: 40 }
+    ];
+
+    const defaultCustomers = [
+      { id: 'cust-101', flatNumber: '101', customerName: 'Rahul Sharma', phoneNumber: '9876543210', building: 'Rohija', milkType: 'Gokul Special', defaultMilkQuantity: '1 Liter', quantityValue: 1, status: 'Active', deliveryStartDate: '2026-03-01' },
+      { id: 'cust-102', flatNumber: '204', customerName: 'Sneha Patel', phoneNumber: '9812345678', building: 'Sai Darshan', milkType: 'Cow Milk', defaultMilkQuantity: '2 Liters', quantityValue: 2, status: 'Active', deliveryStartDate: '2026-03-05' },
+      { id: 'cust-103', flatNumber: 'B-12', customerName: 'Kunal Desai', phoneNumber: '9890011223', building: 'Om Residency', milkType: 'Buffalo Milk', defaultMilkQuantity: '1.5 Liters', quantityValue: 1.5, status: 'Paused', deliveryStartDate: '2026-03-10' }
+    ];
+
+    let customers = [];
+    let pendingDeleteId = null;
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showNotice(message, type) {
+      const notice = document.getElementById('notice');
+      notice.textContent = message;
+      notice.className = 'notice show ' + type;
+      clearTimeout(showNotice.timeoutId);
+      showNotice.timeoutId = setTimeout(function() {
+        notice.className = 'notice';
+      }, 2600);
+    }
+
+    function ensureStorage() {
+      if (!localStorage.getItem(BUILDING_STORAGE_KEY)) {
+        localStorage.setItem(BUILDING_STORAGE_KEY, JSON.stringify(defaultBuildings));
+      }
+      if (!localStorage.getItem(MILK_TYPES_STORAGE_KEY)) {
+        localStorage.setItem(MILK_TYPES_STORAGE_KEY, JSON.stringify(defaultMilkTypes));
+      }
+      if (!localStorage.getItem(CUSTOMER_STORAGE_KEY)) {
+        localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(defaultCustomers));
+      }
+    }
+
+    function getBuildings() {
+      return JSON.parse(localStorage.getItem(BUILDING_STORAGE_KEY) || '[]');
+    }
+
+    function getMilkTypes() {
+      const data = JSON.parse(localStorage.getItem(MILK_TYPES_STORAGE_KEY) || '[]');
+      return data.map(function(item) {
+        return item.name ? item.name : item;
+      });
+    }
+
+    function saveCustomers() {
+      localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(customers));
+      renderAll();
+    }
+
+    function loadCustomers() {
+      customers = JSON.parse(localStorage.getItem(CUSTOMER_STORAGE_KEY) || '[]');
+      renderAll();
+    }
+
+    function renderAll() {
+      populateDropdowns();
+      renderSummary();
+      renderTable();
+    }
+
+    function renderSummary() {
+      const uniqueBuildings = new Set(customers.map(function(customer) { return customer.building; }).filter(Boolean));
+      document.getElementById('customers-count').textContent = customers.length;
+      document.getElementById('active-count').textContent = customers.filter(function(customer) { return customer.status === 'Active'; }).length;
+      document.getElementById('building-count').textContent = uniqueBuildings.size;
+    }
+
+    function populateDropdowns() {
+      const buildingField = document.getElementById('buildingName');
+      const buildingFilterField = document.getElementById('buildingFilter');
+      const milkTypeField = document.getElementById('milkType');
+      const milkTypeFilterField = document.getElementById('milkTypeFilter');
+      const selectedBuilding = buildingField.value;
+      const selectedBuildingFilter = buildingFilterField.value;
+      const selectedMilkType = milkTypeField.value;
+      const selectedMilkTypeFilter = milkTypeFilterField.value;
+
+      const buildingOptions = '<option value="">Select building</option>' + getBuildings().map(function(building) {
+        return '<option value="' + escapeHtml(building.name) + '">' + escapeHtml(building.name) + '</option>';
+      }).join('');
+
+      const milkTypeOptions = '<option value="">Select milk type</option>' + getMilkTypes().map(function(milkType) {
+        return '<option value="' + escapeHtml(milkType) + '">' + escapeHtml(milkType) + '</option>';
+      }).join('');
+
+      buildingField.innerHTML = buildingOptions;
+      buildingFilterField.innerHTML = '<option value="">Filter by Building</option>' + getBuildings().map(function(building) {
+        return '<option value="' + escapeHtml(building.name) + '">' + escapeHtml(building.name) + '</option>';
+      }).join('');
+      milkTypeField.innerHTML = milkTypeOptions;
+      milkTypeFilterField.innerHTML = '<option value="">Filter by Milk Type</option>' + getMilkTypes().map(function(milkType) {
+        return '<option value="' + escapeHtml(milkType) + '">' + escapeHtml(milkType) + '</option>';
+      }).join('');
+
+      buildingField.value = getBuildings().some(function(building) { return building.name === selectedBuilding; }) ? selectedBuilding : '';
+      buildingFilterField.value = getBuildings().some(function(building) { return building.name === selectedBuildingFilter; }) ? selectedBuildingFilter : '';
+      milkTypeField.value = getMilkTypes().some(function(milkType) { return milkType === selectedMilkType; }) ? selectedMilkType : '';
+      milkTypeFilterField.value = getMilkTypes().some(function(milkType) { return milkType === selectedMilkTypeFilter; }) ? selectedMilkTypeFilter : '';
+    }
+
+    function syncLinkedData() {
+      populateDropdowns();
+      renderSummary();
+      renderTable();
+    }
+
+    function filteredCustomers() {
+      const query = String(document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const buildingFilter = document.getElementById('buildingFilter').value;
+      const milkTypeFilter = document.getElementById('milkTypeFilter').value;
+
+      return customers.filter(function(customer) {
+        const matchesSearch = !query ||
+          customer.customerName.toLowerCase().includes(query) ||
+          customer.phoneNumber.toLowerCase().includes(query) ||
+          customer.flatNumber.toLowerCase().includes(query);
+
+        const matchesBuilding = !buildingFilter || customer.building === buildingFilter;
+        const matchesMilkType = !milkTypeFilter || customer.milkType === milkTypeFilter;
+
+        return matchesSearch && matchesBuilding && matchesMilkType;
+      });
+    }
+
+    function renderTable() {
+      const wrap = document.getElementById('customersTableWrap');
+      const rows = filteredCustomers();
+
+      if (!rows.length) {
+        wrap.innerHTML = '<div class="empty">No customers matched the current search or filter selection.</div>';
+        return;
+      }
+
+      wrap.innerHTML =
+        '<div class="table-wrap"><table><thead><tr>' +
+        '<th>Flat Number</th><th>Customer Name</th><th>Phone Number</th><th>Building</th><th>Milk Type</th><th>Default Milk Quantity</th><th>Status</th><th>Actions</th>' +
+        '</tr></thead><tbody>' +
+        rows.map(function(customer) {
+          return '<tr>' +
+            '<td>' + escapeHtml(customer.flatNumber) + '</td>' +
+            '<td>' + escapeHtml(customer.customerName) + '</td>' +
+            '<td>' + escapeHtml(customer.phoneNumber) + '</td>' +
+            '<td>' + escapeHtml(customer.building) + '</td>' +
+            '<td>' + escapeHtml(customer.milkType) + '</td>' +
+            '<td>' + escapeHtml(customer.defaultMilkQuantity) + '</td>' +
+            '<td><span class="status-pill">' + escapeHtml(customer.status) + '</span></td>' +
+            '<td><div class="row-actions"><button class="action-link" type="button" onclick="openEditCustomer(\'' + customer.id + '\')">Edit</button><button class="action-link delete" type="button" onclick="openDeleteConfirm(\'' + customer.id + '\')">Delete</button></div></td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table></div>';
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('show');
+      document.getElementById('overlay').classList.add('show');
+    }
+
+    function closeModals() {
+      document.querySelectorAll('.modal').forEach(function(modal) {
+        modal.classList.remove('show');
+      });
+      document.getElementById('overlay').classList.remove('show');
+    }
+
+    function resetCustomerForm() {
+      document.getElementById('customerForm').reset();
+      document.getElementById('customerId').value = '';
+      document.getElementById('customerModalTitle').textContent = 'Add Customer';
+      document.getElementById('saveCustomerButton').textContent = 'Save Customer';
+      populateDropdowns();
+    }
+
+    function openAddCustomer() {
+      resetCustomerForm();
+      openModal('customerModal');
+    }
+
+    function openEditCustomer(id) {
+      const customer = customers.find(function(item) { return item.id === id; });
+      if (!customer) return;
+
+      resetCustomerForm();
+      document.getElementById('customerId').value = customer.id;
+      document.getElementById('customerName').value = customer.customerName;
+      document.getElementById('phoneNumber').value = customer.phoneNumber;
+      document.getElementById('buildingName').value = customer.building;
+      document.getElementById('flatNumber').value = customer.flatNumber;
+      document.getElementById('milkType').value = customer.milkType;
+      document.getElementById('defaultQuantity').value = customer.quantityValue;
+      document.getElementById('startDate').value = customer.deliveryStartDate;
+      document.getElementById('customerStatus').value = customer.status;
+      document.getElementById('customerModalTitle').textContent = 'Edit Customer';
+      document.getElementById('saveCustomerButton').textContent = 'Update Customer';
+      openModal('customerModal');
+    }
+
+    function openDeleteConfirm(id) {
+      pendingDeleteId = id;
+      openModal('deleteModal');
+    }
+
+    function confirmDelete() {
+      if (!pendingDeleteId) return;
+      customers = customers.filter(function(customer) { return customer.id !== pendingDeleteId; });
+      pendingDeleteId = null;
+      closeModals();
+      saveCustomers();
+      showNotice('Customer deleted successfully.', 'success');
+    }
+
+    function quantityLabel(value) {
+      const numeric = Number(value);
+      return numeric === 1 ? '1 Liter' : numeric + ' Liters';
+    }
+
+    function saveCustomerRecord(event) {
+      event.preventDefault();
+
+      const customerId = document.getElementById('customerId').value;
+      const customerName = String(document.getElementById('customerName').value || '').trim();
+      const phoneNumber = String(document.getElementById('phoneNumber').value || '').trim();
+      const building = document.getElementById('buildingName').value;
+      const flatNumber = String(document.getElementById('flatNumber').value || '').trim();
+      const milkType = document.getElementById('milkType').value;
+      const quantityValue = Number(document.getElementById('defaultQuantity').value);
+      const deliveryStartDate = document.getElementById('startDate').value;
+      const status = document.getElementById('customerStatus').value;
+
+      if (!customerName || !phoneNumber || !building || !flatNumber || !milkType || Number.isNaN(quantityValue) || quantityValue <= 0 || !deliveryStartDate) {
+        showNotice('Please complete all customer fields with valid values.', 'error');
+        return;
+      }
+
+      const record = {
+        id: customerId || 'cust-' + Date.now(),
+        flatNumber: flatNumber,
+        customerName: customerName,
+        phoneNumber: phoneNumber,
+        building: building,
+        milkType: milkType,
+        defaultMilkQuantity: quantityLabel(quantityValue),
+        quantityValue: quantityValue,
+        status: status,
+        deliveryStartDate: deliveryStartDate
+      };
+
+      if (customerId) {
+        customers = customers.map(function(customer) {
+          return customer.id === customerId ? record : customer;
+        });
+        showNotice('Customer updated successfully.', 'success');
+      } else {
+        customers.push(record);
+        showNotice('Customer added successfully.', 'success');
+      }
+
+      closeModals();
+      saveCustomers();
+    }
+
+    document.getElementById('openAddCustomer').addEventListener('click', openAddCustomer);
+    document.getElementById('focusSearch').addEventListener('click', function() {
+      document.getElementById('searchInput').focus();
+    });
+    document.getElementById('focusFilters').addEventListener('click', function() {
+      document.getElementById('buildingFilter').focus();
+    });
+    document.getElementById('customerForm').addEventListener('submit', saveCustomerRecord);
+    document.getElementById('confirmDeleteButton').addEventListener('click', confirmDelete);
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+    document.getElementById('buildingFilter').addEventListener('change', renderTable);
+    document.getElementById('milkTypeFilter').addEventListener('change', renderTable);
+    window.addEventListener('focus', syncLinkedData);
+    window.addEventListener('pageshow', syncLinkedData);
+    window.addEventListener('storage', function(event) {
+      if (event.key === BUILDING_STORAGE_KEY || event.key === MILK_TYPES_STORAGE_KEY) {
+        syncLinkedData();
+      }
+    });
+
+    document.querySelectorAll('[data-close-modal]').forEach(function(button) {
+      button.addEventListener('click', closeModals);
+    });
+
+    document.querySelectorAll('.modal').forEach(function(modal) {
+      modal.addEventListener('click', function(event) {
+        if (event.target === modal) closeModals();
+      });
+    });
+
+    document.getElementById('overlay').addEventListener('click', closeModals);
+
+    ensureStorage();
+    loadCustomers();
+  </script>
+</body>
+</html>
