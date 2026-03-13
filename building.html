@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MilkMate Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--surface:rgba(255,255,255,.9);--surface-strong:#fff;--text:#163328;--muted:#6a7f74;--line:rgba(18,54,41,.1);--primary:#1f7a5a;--primary-strong:#14543d;--primary-soft:#dff2ea;--danger:#c84f4f;--sidebar-width:272px;--radius:24px;--shadow:0 24px 60px rgba(18,54,41,.1)}
+    body{font-family:Manrope,sans-serif;background:radial-gradient(circle at top left,rgba(112,191,154,.18),transparent 26%),linear-gradient(180deg,#eef5ea 0%,#f9fbf8 100%);color:var(--text);min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);background:linear-gradient(180deg,#1a4a3a 0%,#0a1f17 100%);color:#fff;padding:24px 18px;display:flex;flex-direction:column;gap:18px;z-index:20}
+    .brand,.side-note,.card,.hero,.modal-box{border-radius:var(--radius)}
+    .brand{display:flex;gap:12px;align-items:center;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+    .mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f4fffb,#9fe1c0);color:var(--primary-strong);display:grid;place-items:center;font-weight:800}
+    .nav-item{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;color:rgba(255,255,255,.82);cursor:pointer;transition:.2s ease}
+    button.nav-item{width:100%;border:0;background:transparent;font:inherit;text-align:left}
+    .nav-item:hover,.nav-item.active{background:rgba(255,255,255,.1);color:#fff}
+    .nav-icon{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.08);display:grid;place-items:center;flex-shrink:0}
+    .side-note{margin-top:auto;padding:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:13px;line-height:1.6}
+    .main{margin-left:var(--sidebar-width);padding:28px;min-height:100vh}
+    .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:24px}
+    .top h1{font-family:"Instrument Serif",serif;font-size:clamp(2.3rem,5vw,3.6rem);line-height:.95;font-weight:400}
+    .top p{margin-top:10px;color:var(--muted);max-width:720px}
+    .hero,.card{background:var(--surface);border:1px solid rgba(255,255,255,.72);box-shadow:var(--shadow)}
+    .hero{padding:24px;display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:22px}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .metric,.pill,.info{background:#fff;border:1px solid var(--line);border-radius:20px}
+    .metric{padding:18px}
+    .metric span,.muted,.sub{color:var(--muted)}
+    .metric strong{display:block;font-size:30px;margin-top:16px}
+    .notice{padding:14px 16px;border-radius:16px;margin-bottom:16px;display:none}
+    .notice.show{display:block}
+    .notice.success{background:#e7f7ef;color:#16653f}
+    .notice.error{background:#fceceb;color:#a33f3f}
+    .content{display:none}
+    .content.active{display:block}
+    .layout{display:grid;grid-template-columns:1fr;gap:22px}
+    .card{padding:24px}
+    .head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px}
+    .head h3{font-size:22px}
+    .badge{display:inline-flex;padding:8px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary-strong);font-size:12px;font-weight:700}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+    .btn,.action,.close,.mobile-toggle{border:0;font:inherit;cursor:pointer}
+    .action{padding:13px 16px;border-radius:16px;background:#fff;border:1px solid var(--line);display:inline-flex;gap:10px;align-items:center}
+    .chip{width:28px;height:28px;border-radius:10px;background:var(--primary-soft);color:var(--primary-strong);display:grid;place-items:center;font-weight:800}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:20px;background:#fff}
+    table{width:100%;border-collapse:collapse;min-width:620px}
+    th,td{padding:16px 18px;text-align:left;border-bottom:1px solid rgba(18,54,41,.08)}
+    th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#f9fcfa}
+    .empty{border:1px dashed rgba(18,54,41,.2);border-radius:22px;padding:28px;text-align:center;color:var(--muted);background:rgba(255,255,255,.52)}
+    .stack{display:grid;gap:18px}
+    .placeholder{padding:22px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.88)}
+    .overlay,.modal{position:fixed;inset:0}
+    .overlay{background:rgba(3,12,8,.42);display:none;z-index:21}
+    .overlay.show{display:block}
+    .modal{background:rgba(5,18,12,.52);display:none;align-items:center;justify-content:center;padding:20px;z-index:22}
+    .modal.show{display:flex}
+    .modal-box{width:min(100%,480px);background:#fff;padding:24px}
+    .modal-top{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px}
+    .form{display:grid;gap:16px}
+    .field label{display:block;margin-bottom:8px;font-size:13px;font-weight:700}
+    .field input,.field select{width:100%;padding:14px 16px;border-radius:16px;border:1px solid rgba(18,54,41,.14);background:#fbfdfc;font:inherit}
+    .form-actions{display:flex;justify-content:flex-end;gap:12px}
+    .btn{border-radius:16px;padding:13px 16px;font-weight:700}
+    .btn.primary{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-strong) 100%);color:#fff}
+    .btn.danger{background:linear-gradient(135deg,#d45b5b 0%,#b93c3c 100%);color:#fff}
+    .btn.ghost{background:#f4f7f5;color:var(--text)}
+    .mobile-toggle{display:none}
+    @media (max-width:980px){.sidebar{transform:translateX(-100%);transition:.24s ease}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:18px}.mobile-toggle{display:inline-flex;padding:12px 14px;border-radius:16px;background:#fff;box-shadow:var(--shadow)}.hero,.layout{grid-template-columns:1fr}}
+    @media (max-width:700px){.metrics{grid-template-columns:1fr}.actions,.form-actions{flex-direction:column}.action,.btn{width:100%;justify-content:center}}
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="mark">M</div><div><strong>MilkMate</strong><div class="muted" style="color:rgba(220,244,234,.68);font-size:13px;margin-top:3px">Admin control center</div></div></div>
+    <div class="nav">
+      <button class="nav-item" type="button" onclick="window.location.href='Milk types.html'"><div class="nav-icon">M</div><div>Milk Types<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Inventory and pricing</div></div></button>
+      <button class="nav-item active" type="button"><div class="nav-icon">B</div><div>Buildings<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Societies and delivery zones</div></div></button>
+      <button class="nav-item" type="button" onclick="window.location.href='cust.html'"><div class="nav-icon">C</div><div>Customers<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Subscriber records</div></div></button>
+      <button class="nav-item" type="button" onclick="window.location.href='del.html'"><div class="nav-icon">D</div><div>Delivery Table<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Route and quantity control</div></div></button>
+      <div class="nav-item"><div class="nav-icon">T</div><div>Tomorrow Demand<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Forecasted orders</div></div></div>
+      <div class="nav-item"><div class="nav-icon">$</div><div>Bill Generator<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Monthly invoicing</div></div></div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="top"><div><h1>Milk delivery, under control.</h1><p>MilkMate gives your admin team one place to manage buildings, customer distribution, demand planning, and recurring delivery operations.</p></div><button class="mobile-toggle" id="mobileToggle" type="button">Menu</button></div>
+    <section class="hero">
+      <div class="metrics">
+        <div class="metric"><span>Total Buildings</span><strong id="totalBuildings">0</strong><small class="sub">Managed delivery zones</small></div>
+        <div class="metric"><span>Total Records</span><strong id="totalCustomers">0</strong><small class="sub">Local dashboard entries</small></div>
+        <div class="metric"><span>Selected Charge</span><strong id="selectedCharge">Rs 0.00</strong><small class="sub">Current selected building charge</small></div>
+      </div>
+    </section>
+    <div class="notice" id="notice"></div>
+    <section class="content active" data-panel="buildings">
+      <div class="layout">
+        <div class="card">
+          <div class="head"><div><h3>Buildings Management</h3><p class="muted" style="margin-top:6px">Manage apartments, societies, and building-level delivery charges from one responsive admin page.</p></div><div class="badge">Frontend storage: local</div></div>
+          <div class="actions">
+            <button class="action" type="button" data-modal="addBuildingModal"><span class="chip">+</span><span>Add Building</span></button>
+            <button class="action" type="button" data-modal="deleteBuildingModal"><span class="chip">-</span><span>Delete Building</span></button>
+            <button class="action" type="button" data-modal="updateBuildingModal"><span class="chip">U</span><span>Update Building</span></button>
+          </div>
+        </div>
+        <div class="card"><div class="head"><div><h3>Building Charges</h3><p class="muted" style="margin-top:6px">View all building names with their delivery prices.</p></div></div><div id="chargesWrap"></div></div>
+      </div>
+    </section>
+  </main>
+  <div class="modal" id="addBuildingModal"><div class="modal-box"><div class="modal-top"><div><h4>Add Building</h4><p class="muted" style="margin-top:8px">Create a new building entry for customer grouping and route planning.</p></div><button class="close" type="button" data-close-modal>&times;</button></div><form class="form" id="addBuildingForm"><div class="field"><label for="buildingName">Building Name</label><input id="buildingName" name="building_name" type="text" required></div><div class="field"><label for="buildingCharge">Delivery Charges</label><input id="buildingCharge" name="delivery_charge" type="number" step="0.01" min="0" required></div><div class="form-actions"><button class="btn ghost" type="button" data-close-modal>Cancel</button><button class="btn primary" type="submit">Add Building</button></div></form></div></div>
+  <div class="modal" id="deleteBuildingModal"><div class="modal-box"><div class="modal-top"><div><h4>Delete Building</h4><p class="muted" style="margin-top:8px">Select an existing building to remove it from the system.</p></div><button class="close" type="button" data-close-modal>&times;</button></div><form class="form" id="deleteBuildingForm"><div class="field"><label for="deleteBuildingSelect">Building Name</label><select id="deleteBuildingSelect" name="building_id" required></select></div><div class="form-actions"><button class="btn ghost" type="button" data-close-modal>Cancel</button><button class="btn danger" type="submit">Delete</button></div></form></div></div>
+  <div class="modal" id="updateBuildingModal"><div class="modal-box"><div class="modal-top"><div><h4>Update Building</h4><p class="muted" style="margin-top:8px">Rename an existing building and update its delivery charge.</p></div><button class="close" type="button" data-close-modal>&times;</button></div><form class="form" id="updateBuildingForm"><div class="field"><label for="updateBuildingSelect">Existing Building</label><select id="updateBuildingSelect" name="building_id" required></select></div><div class="field"><label for="newBuildingName">New Building Name</label><input id="newBuildingName" name="new_name" type="text" required></div><div class="field"><label for="newBuildingCharge">Delivery Charges</label><input id="newBuildingCharge" name="delivery_charge" type="number" step="0.01" min="0" required></div><div class="form-actions"><button class="btn ghost" type="button" data-close-modal>Cancel</button><button class="btn primary" type="submit">Update</button></div></form></div></div>
+  <script>
+    const STORAGE_KEYS={buildings:"milkmate_buildings",customers:"milkmate_customers"};
+    const seedBuildings=[{id:1,name:"Rohija",deliveryCharge:25},{id:2,name:"Sai Darshan",deliveryCharge:30},{id:3,name:"Om Residency",deliveryCharge:20}];
+    const seedCustomers=[{id:1,name:"Aarav Mehta",phone:"9876543210",building:"Rohija"},{id:2,name:"Isha Shah",phone:"9823012456",building:"Rohija"},{id:3,name:"Neha Jain",phone:"9898989898",building:"Sai Darshan"},{id:4,name:"Rohan Patil",phone:"9811122233",building:"Om Residency"},{id:5,name:"Mira Joshi",phone:"9887766554",building:"Sai Darshan"}];
+    const state={page:"buildings",selectedBuildingId:null};
+    const sidebar=document.getElementById("sidebar");
+    const overlay=document.getElementById("overlay");
+    const notice=document.getElementById("notice");
+
+    function initStorage(){if(!localStorage.getItem(STORAGE_KEYS.buildings)){localStorage.setItem(STORAGE_KEYS.buildings,JSON.stringify(seedBuildings));}if(!localStorage.getItem(STORAGE_KEYS.customers)){localStorage.setItem(STORAGE_KEYS.customers,JSON.stringify(seedCustomers));}}
+    function getBuildings(){return JSON.parse(localStorage.getItem(STORAGE_KEYS.buildings)||"[]");}
+    function setBuildings(buildings){localStorage.setItem(STORAGE_KEYS.buildings,JSON.stringify(buildings));}
+    function getCustomers(){return JSON.parse(localStorage.getItem(STORAGE_KEYS.customers)||"[]");}
+    function formatMoney(value){return `Rs ${Number(value||0).toFixed(2)}`;}
+    function escapeHtml(value){return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+    function showNotice(message,type){notice.textContent=message;notice.className=`notice show ${type}`;clearTimeout(showNotice.timeoutId);showNotice.timeoutId=setTimeout(()=>{notice.className="notice";},2600);}
+    function selectedBuilding(){const buildings=getBuildings();if(!buildings.length)return null;if(state.selectedBuildingId===null){state.selectedBuildingId=buildings[0].id;}return buildings.find((building)=>building.id===state.selectedBuildingId)||buildings[0];}
+    function renderMetrics(){const buildings=getBuildings();const selected=selectedBuilding();document.getElementById("totalBuildings").textContent=buildings.length;document.getElementById("totalCustomers").textContent=buildings.length;document.getElementById("selectedCharge").textContent=selected?formatMoney(selected.deliveryCharge):"Rs 0.00";}
+    function renderCharges(){const wrap=document.getElementById("chargesWrap");const buildings=getBuildings();if(!buildings.length){wrap.innerHTML='<div class="empty">No building charges available yet.</div>';return;}wrap.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Building Name</th><th>Delivery Price</th></tr></thead><tbody>${buildings.map((building)=>`<tr><td>${escapeHtml(building.name)}</td><td>${formatMoney(building.deliveryCharge)}</td></tr>`).join("")}</tbody></table></div>`;}
+    function populateSelects(){const buildings=getBuildings();const options=buildings.length?`<option value="">Select building</option>${buildings.map((building)=>`<option value="${building.id}">${escapeHtml(building.name)}</option>`).join("")}`:'<option value="">No buildings available</option>';document.getElementById("deleteBuildingSelect").innerHTML=options;document.getElementById("updateBuildingSelect").innerHTML=options;}
+    function renderAll(){renderMetrics();renderCharges();populateSelects();}
+    function openModal(id){const modal=document.getElementById(id);if(modal){modal.classList.add("show");overlay.classList.add("show");}}
+    function closeModals(){document.querySelectorAll(".modal").forEach((modal)=>modal.classList.remove("show"));overlay.classList.remove("show");}
+
+    document.getElementById("addBuildingForm").addEventListener("submit",(event)=>{event.preventDefault();const form=new FormData(event.currentTarget);const name=String(form.get("building_name")||"").trim();const deliveryCharge=Number(form.get("delivery_charge")||0);const buildings=getBuildings();if(!name){showNotice("Building name is required.","error");return;}if(buildings.some((building)=>building.name.toLowerCase()===name.toLowerCase())){showNotice("That building already exists.","error");return;}const nextId=buildings.length?Math.max(...buildings.map((building)=>building.id))+1:1;buildings.push({id:nextId,name,deliveryCharge});setBuildings(buildings);state.selectedBuildingId=nextId;event.currentTarget.reset();closeModals();renderAll();showNotice("Building added successfully.","success");});
+    document.getElementById("deleteBuildingForm").addEventListener("submit",(event)=>{event.preventDefault();const id=Number(new FormData(event.currentTarget).get("building_id")||0);if(!id){showNotice("Please select a building to delete.","error");return;}const buildings=getBuildings().filter((building)=>building.id!==id);setBuildings(buildings);if(state.selectedBuildingId===id){state.selectedBuildingId=buildings.length?buildings[0].id:null;}event.currentTarget.reset();closeModals();renderAll();showNotice("Building deleted successfully.","success");});
+    document.getElementById("updateBuildingSelect").addEventListener("change",(event)=>{const id=Number(event.target.value||0);const building=getBuildings().find((item)=>item.id===id);document.getElementById("newBuildingName").value=building?building.name:"";document.getElementById("newBuildingCharge").value=building?building.deliveryCharge:"";});
+    document.getElementById("updateBuildingForm").addEventListener("submit",(event)=>{event.preventDefault();const form=new FormData(event.currentTarget);const id=Number(form.get("building_id")||0);const newName=String(form.get("new_name")||"").trim();const deliveryCharge=Number(form.get("delivery_charge")||0);const buildings=getBuildings();if(!id){showNotice("Please select a building to update.","error");return;}if(!newName){showNotice("New building name is required.","error");return;}if(buildings.some((building)=>building.id!==id&&building.name.toLowerCase()===newName.toLowerCase())){showNotice("Another building already uses that name.","error");return;}const updated=buildings.map((building)=>building.id===id?{...building,name:newName,deliveryCharge}:building);setBuildings(updated);state.selectedBuildingId=id;closeModals();renderAll();showNotice("Building updated successfully.","success");});
+    document.querySelectorAll("[data-modal]").forEach((button)=>{button.addEventListener("click",()=>openModal(button.dataset.modal));});
+    document.querySelectorAll("[data-close-modal]").forEach((button)=>{button.addEventListener("click",closeModals);});
+    document.querySelectorAll(".modal").forEach((modal)=>{modal.addEventListener("click",(event)=>{if(event.target===modal)closeModals();});});
+    overlay.addEventListener("click",()=>{sidebar.classList.remove("open");closeModals();});
+    document.getElementById("mobileToggle").addEventListener("click",()=>{sidebar.classList.toggle("open");overlay.classList.toggle("show");});
+    initStorage();renderAll();
+  </script>
+</body>
+</html>
