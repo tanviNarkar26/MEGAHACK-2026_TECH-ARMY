@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milk Types</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --surface: rgba(255,255,255,.9);
+      --text: #163328;
+      --muted: #6a7f74;
+      --line: rgba(18,54,41,.1);
+      --primary: #1f7a5a;
+      --primary-strong: #14543d;
+      --primary-soft: #dff2ea;
+      --danger: #c84f4f;
+      --sidebar-width: 272px;
+      --radius: 24px;
+      --shadow: 0 24px 60px rgba(18,54,41,.1);
+    }
+    body {
+      font-family: Manrope, sans-serif;
+      background: radial-gradient(circle at top left, rgba(112,191,154,.18), transparent 26%), linear-gradient(180deg, #eef5ea 0%, #f9fbf8 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #1a4a3a 0%, #0a1f17 100%);
+      color: #fff;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 20;
+    }
+    .brand, .side-note, .card, .hero {
+      border-radius: var(--radius);
+    }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f4fffb, #9fe1c0);
+      color: var(--primary-strong);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .nav-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 18px;
+      color: rgba(255,255,255,.82);
+      transition: .2s ease;
+    }
+    button.nav-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,.1);
+      color: #fff;
+    }
+    .nav-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .main {
+      margin-left: var(--sidebar-width);
+      padding: 28px;
+      min-height: 100vh;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .top h1 {
+      font-family: "Instrument Serif", serif;
+      font-size: clamp(2.3rem, 5vw, 3.6rem);
+      line-height: .95;
+      font-weight: 400;
+    }
+    .top p {
+      margin-top: 10px;
+      color: var(--muted);
+      max-width: 720px;
+    }
+    .hero, .card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .metric {
+      padding: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+    }
+    .metric span, .muted {
+      color: var(--muted);
+    }
+    .metric strong {
+      display: block;
+      font-size: 30px;
+      margin-top: 16px;
+    }
+    .notice {
+      padding: 14px 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .notice.show { display: block; }
+    .notice.success { background: #e7f7ef; color: #16653f; }
+    .notice.error { background: #fceceb; color: #a33f3f; }
+    .card {
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+    .head h3 {
+      font-size: 22px;
+    }
+    .badge {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px 150px;
+      gap: 12px;
+    }
+    .field-input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(18,54,41,.14);
+      background: #fbfdfc;
+      font: inherit;
+    }
+    .button {
+      border: 0;
+      border-radius: 16px;
+      padding: 13px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .button.primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
+      color: #fff;
+    }
+    .button.dark {
+      background: #1f3d31;
+      color: #fff;
+    }
+    .button.danger {
+      background: linear-gradient(135deg, #d45b5b 0%, #b93c3c 100%);
+      color: #fff;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    th, td {
+      padding: 16px 18px;
+      text-align: left;
+      border-bottom: 1px solid rgba(18,54,41,.08);
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      background: #f9fcfa;
+    }
+    .update-group {
+      display: flex;
+      gap: 10px;
+      min-width: 260px;
+    }
+    .empty {
+      border: 1px dashed rgba(18,54,41,.2);
+      border-radius: 22px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,.52);
+    }
+    @media (max-width: 980px) {
+      .sidebar { position: static; width: 100%; }
+      .main { margin-left: 0; padding: 18px; }
+      .metrics { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .update-group { flex-direction: column; min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">M</div>
+      <div>
+        <strong>MilkMate</strong>
+        <div class="muted" style="color:rgba(220,244,234,.68);font-size:13px;margin-top:3px">Admin control center</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-item active" type="button" onclick="navigateParent('milk-types')">
+        <div class="nav-icon">M</div>
+        <div>Milk Types<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Inventory and pricing</div></div>
+      </button>
+      <button class="nav-item" type="button" onclick="navigateParent('buildings')">
+        <div class="nav-icon">B</div>
+        <div>Buildings<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Societies and delivery zones</div></div>
+      </button>
+      <div class="nav-item"><div class="nav-icon">C</div><div>Customers<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Subscriber records</div></div></div>
+      <div class="nav-item"><div class="nav-icon">D</div><div>Delivery Table<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Route and quantity control</div></div></div>
+      <div class="nav-item"><div class="nav-icon">T</div><div>Tomorrow Demand<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Forecasted orders</div></div></div>
+      <div class="nav-item"><div class="nav-icon">$</div><div>Bill Generator<div style="font-size:11px;color:rgba(223,242,234,.6);margin-top:2px">Monthly invoicing</div></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1>Milk pricing, made simple.</h1>
+        <p>Maintain current milk rates, update prices when the market changes, and keep a clear audit trail of every revision.</p>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="metrics">
+        <div class="metric"><span>Milk Types</span><strong id="milk-types-count">0</strong><small class="muted">Active entries</small></div>
+        <div class="metric"><span>Price Changes</span><strong id="history-count">0</strong><small class="muted">Tracked revisions</small></div>
+      </div>
+    </section>
+
+    <div class="notice" id="notice"></div>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <h3>Add Milk Type</h3>
+          <p class="muted" style="margin-top:6px">Create a milk entry with its current selling price.</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <input id="milk-type-name" class="field-input" type="text" placeholder="Milk type name">
+        <input id="milk-type-price" class="field-input" type="number" min="0" step="0.01" placeholder="Current price">
+        <button type="button" class="button primary" onclick="addMilkType()">Add Milk</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <h3>Current Milk Prices</h3>
+          <p class="muted" style="margin-top:6px">Update prices or remove milk types from your active list.</p>
+        </div>
+      </div>
+      <div id="milk-types-wrap"></div>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <h3>Price Update History</h3>
+          <p class="muted" style="margin-top:6px">Every change records the date, previous price, and updated price.</p>
+        </div>
+      </div>
+      <div id="history-wrap"></div>
+    </section>
+  </main>
+
+  <script>
+    const MILK_TYPES_STORAGE_KEY = 'milkmate-milk-types';
+    const MILK_HISTORY_STORAGE_KEY = 'milkmate-milk-history';
+    const DEFAULT_MILK_DATA = {
+      milkTypes: [
+        { id: 'amul-milk', name: 'Amul Milk', price: 34, createdAt: '2026-03-13T09:30:00.000Z', updatedAt: '2026-03-13T09:30:00.000Z' },
+        { id: 'mother-dairy', name: 'Mother Dairy', price: 36, createdAt: '2026-03-13T09:30:00.000Z', updatedAt: '2026-03-13T09:30:00.000Z' }
+      ],
+      priceHistory: [
+        { id: 'history-amul-1', name: 'Amul Milk', date: '2026-03-05T09:30:00.000Z', previousPrice: 32, updatedPrice: 34 }
+      ]
+    };
+
+    let milkTypes = [];
+    let milkPriceHistory = [];
+
+    function navigateParent(view) {
+      if (window.parent && window.parent !== window && typeof window.parent.showAdminView === 'function') {
+        window.parent.showAdminView(view);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatMoney(value) {
+      return 'Rs ' + Number(value || 0).toFixed(2);
+    }
+
+    function formatDateTime(value) {
+      return value ? new Date(value).toLocaleString() : '-';
+    }
+
+    function showNotice(message, type) {
+      const notice = document.getElementById('notice');
+      notice.textContent = message;
+      notice.className = 'notice show ' + type;
+      clearTimeout(showNotice.timeoutId);
+      showNotice.timeoutId = setTimeout(function() {
+        notice.className = 'notice';
+      }, 2600);
+    }
+
+    function loadMilkData() {
+      try {
+        const storedMilkTypes = localStorage.getItem(MILK_TYPES_STORAGE_KEY);
+        const storedHistory = localStorage.getItem(MILK_HISTORY_STORAGE_KEY);
+
+        if (storedMilkTypes) {
+          milkTypes = JSON.parse(storedMilkTypes);
+          milkPriceHistory = storedHistory ? JSON.parse(storedHistory) : [];
+        } else {
+          milkTypes = DEFAULT_MILK_DATA.milkTypes.slice();
+          milkPriceHistory = DEFAULT_MILK_DATA.priceHistory.slice();
+          saveMilkData();
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to load milk data:', error);
+        milkTypes = DEFAULT_MILK_DATA.milkTypes.slice();
+        milkPriceHistory = DEFAULT_MILK_DATA.priceHistory.slice();
+      }
+
+      renderAll();
+    }
+
+    function saveMilkData() {
+      localStorage.setItem(MILK_TYPES_STORAGE_KEY, JSON.stringify(milkTypes));
+      localStorage.setItem(MILK_HISTORY_STORAGE_KEY, JSON.stringify(milkPriceHistory));
+      renderAll();
+    }
+
+    function renderAll() {
+      document.getElementById('milk-types-count').textContent = milkTypes.length;
+      document.getElementById('history-count').textContent = milkPriceHistory.length;
+      renderMilkTable();
+      renderHistoryTable();
+    }
+
+    function renderMilkTable() {
+      const wrap = document.getElementById('milk-types-wrap');
+      if (!milkTypes.length) {
+        wrap.innerHTML = '<div class="empty">No milk types added yet.</div>';
+        return;
+      }
+
+      wrap.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Milk Type</th><th>Current Price</th><th>Update Price</th><th>Delete</th></tr></thead><tbody>' +
+        milkTypes.map(function(item) {
+          return '<tr>' +
+            '<td>' + escapeHtml(item.name) + '</td>' +
+            '<td>' + formatMoney(item.price) + '</td>' +
+            '<td><div class="update-group"><input id="update-price-' + item.id + '" class="field-input" type="number" min="0" step="0.01" placeholder="New price"><button type="button" class="button dark" onclick="updateMilkPrice(\'' + item.id + '\')">Update</button></div></td>' +
+            '<td><button type="button" class="button danger" onclick="deleteMilkType(\'' + item.id + '\')">Delete</button></td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table></div>';
+    }
+
+    function renderHistoryTable() {
+      const wrap = document.getElementById('history-wrap');
+      if (!milkPriceHistory.length) {
+        wrap.innerHTML = '<div class="empty">No price updates recorded yet.</div>';
+        return;
+      }
+
+      wrap.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Milk Type</th><th>Date</th><th>Previous Price</th><th>Updated Price</th></tr></thead><tbody>' +
+        milkPriceHistory.slice().reverse().map(function(entry) {
+          return '<tr>' +
+            '<td>' + escapeHtml(entry.name) + '</td>' +
+            '<td>' + escapeHtml(formatDateTime(entry.date)) + '</td>' +
+            '<td>' + formatMoney(entry.previousPrice) + '</td>' +
+            '<td>' + formatMoney(entry.updatedPrice) + '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table></div>';
+    }
+
+    function addMilkType() {
+      const nameInput = document.getElementById('milk-type-name');
+      const priceInput = document.getElementById('milk-type-price');
+      const name = String(nameInput.value || '').trim();
+      const price = Number(priceInput.value);
+
+      if (!name || Number.isNaN(price) || price < 0) {
+        showNotice('Please enter a valid milk type and price.', 'error');
+        return;
+      }
+
+      if (milkTypes.some(function(item) { return item.name.toLowerCase() === name.toLowerCase(); })) {
+        showNotice('This milk type already exists. Use update instead.', 'error');
+        return;
+      }
+
+      milkTypes.push({
+        id: Date.now().toString(),
+        name: name,
+        price: price,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+
+      nameInput.value = '';
+      priceInput.value = '';
+      saveMilkData();
+      showNotice('Milk type added successfully.', 'success');
+    }
+
+    function updateMilkPrice(id) {
+      const item = milkTypes.find(function(entry) { return entry.id === id; });
+      const input = document.getElementById('update-price-' + id);
+      if (!item || !input) return;
+
+      const updatedPrice = Number(input.value);
+      if (Number.isNaN(updatedPrice) || updatedPrice < 0) {
+        showNotice('Please enter a valid updated price.', 'error');
+        return;
+      }
+
+      if (updatedPrice === Number(item.price)) {
+        showNotice('The new price matches the current price.', 'error');
+        return;
+      }
+
+      milkPriceHistory.push({
+        id: Date.now().toString(),
+        name: item.name,
+        date: new Date().toISOString(),
+        previousPrice: Number(item.price),
+        updatedPrice: updatedPrice
+      });
+
+      item.price = updatedPrice;
+      item.updatedAt = new Date().toISOString();
+      saveMilkData();
+      showNotice('Milk price updated successfully.', 'success');
+    }
+
+    function deleteMilkType(id) {
+      const exists = milkTypes.some(function(entry) { return entry.id === id; });
+      if (!exists) return;
+      milkTypes = milkTypes.filter(function(entry) { return entry.id !== id; });
+      saveMilkData();
+      showNotice('Milk type deleted successfully.', 'success');
+    }
+
+    loadMilkData();
+  </script>
+</body>
+</html>
