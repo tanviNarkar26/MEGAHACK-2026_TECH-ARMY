@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MilkMate</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', sans-serif; }
+    .milk-gradient { background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fefce8 100%); }
+    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); }
+    .milk-drop { animation: float 3s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full milk-gradient overflow-auto">
+   <!-- Navigation -->
+   <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 glass-card border-b border-green-100 hidden">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+     <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('start')">
+      <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center">
+       <i data-lucide="droplets" class="w-5 h-5 text-white"></i>
+      </div><span id="nav-title" class="font-bold text-green-800 text-lg">MilkMate</span>
+     </div>
+     <div class="flex items-center gap-3">
+      <button onclick="showPage('start')" class="text-green-700 hover:text-green-900 font-semibold text-sm px-3 py-1 rounded-lg hover:bg-green-50 transition">Home</button> <button onclick="showPage('login')" class="bg-green-600 hover:bg-green-700 text-white font-semibold text-sm px-4 py-2 rounded-lg transition">Login</button>
+     </div>
+    </div>
+   </nav><!-- Start Page -->
+   <section id="start-page" class="min-h-full flex flex-col items-center justify-center px-4 py-12 fade-in">
+    <div class="text-center max-w-2xl">
+     <!-- Logo -->
+     <div class="mb-8 milk-drop">
+      <div class="w-32 h-32 mx-auto bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-2xl shadow-green-200">
+       <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center">
+        <i data-lucide="droplets" class="w-12 h-12 text-emerald-600"></i>
+       </div>
+      </div>
+     </div>
+     <h1 id="main-title" class="text-5xl font-extrabold text-green-800 mb-4">MilkMate</h1>
+     <p id="main-tagline" class="text-xl text-green-600 font-semibold mb-6">Fresh From Farm to Your Doorstep</p>
+     <div class="glass-card rounded-2xl p-6 mb-8 text-left border border-green-100 shadow-xl">
+      <p class="text-gray-700 leading-relaxed mb-4"><span class="font-bold text-green-700">MilkMate</span> connects local dairy farms with customers who want fresh, pure milk delivered right to their homes. Our platform makes daily milk delivery simple and reliable.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+       <div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+         <i data-lucide="user" class="w-5 h-5 text-green-600"></i>
+        </div>
+        <div>
+         <h3 class="font-bold text-green-800">For Customers</h3>
+         <p class="text-sm text-gray-600">Order and receive fresh milk at your doorstep daily</p>
+        </div>
+       </div>
+       <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-xl">
+        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+         <i data-lucide="truck" class="w-5 h-5 text-amber-600"></i>
+        </div>
+        <div>
+         <h3 class="font-bold text-amber-800">For Suppliers</h3>
+         <p class="text-sm text-gray-600">Manage deliveries and track all customer orders</p>
+        </div>
+       </div>
+      </div>
+     </div><button onclick="showPage('login')" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg shadow-green-200 transition transform hover:scale-105"> <span class="flex items-center gap-2"> Get Started <i data-lucide="arrow-right" class="w-5 h-5"></i> </span> </button>
+    </div>
+   </section><!-- Login/Register Page -->
+   <section id="login-page" class="min-h-full flex flex-col items-center justify-center px-4 py-20 hidden">
+    <div class="w-full max-w-md fade-in">
+     <!-- Role Selector -->
+     <div class="glass-card rounded-2xl p-2 mb-6 flex border border-green-100">
+      <button id="user-tab" onclick="switchRole('user')" class="flex-1 py-3 px-4 rounded-xl font-bold transition flex items-center justify-center gap-2 bg-green-600 text-white"> <i data-lucide="user" class="w-5 h-5"></i> Customer </button> <button id="admin-tab" onclick="switchRole('admin')" class="flex-1 py-3 px-4 rounded-xl font-bold transition flex items-center justify-center gap-2 text-gray-600 hover:bg-gray-100"> <i data-lucide="shield" class="w-5 h-5"></i> Supplier </button>
+     </div><!-- Auth Mode Tabs -->
+     <div class="flex mb-6 gap-2">
+      <button id="login-tab" onclick="switchAuthMode('login')" class="flex-1 py-2 font-bold border-b-2 border-green-600 text-green-700">Login</button> <button id="register-tab" onclick="switchAuthMode('register')" class="flex-1 py-2 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600">Register</button>
+     </div><!-- Login Form -->
+     <form id="login-form" class="glass-card rounded-2xl p-6 border border-green-100 shadow-xl">
+      <h2 id="form-title" class="text-2xl font-bold text-green-800 mb-6 text-center">Customer Login</h2>
+      <div class="space-y-4">
+       <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+        <div class="relative">
+         <i data-lucide="at-sign" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input type="text" id="login-username" placeholder="Enter username" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+        </div>
+       </div>
+       <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+        <div class="relative">
+         <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input type="password" id="login-password" placeholder="Enter password" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+        </div>
+       </div>
+      </div><button type="submit" id="login-btn" class="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transition"> Login </button>
+      <p class="text-center text-sm text-gray-500 mt-4">Don't have an account? <button type="button" onclick="switchAuthMode('register')" class="text-green-600 font-semibold hover:underline">Register here</button></p>
+     </form><!-- Register Form -->
+     <form id="register-form" class="glass-card rounded-2xl p-6 border border-green-100 shadow-xl hidden">
+      <h2 id="register-form-title" class="text-2xl font-bold text-green-800 mb-6 text-center">Customer Registration</h2>
+      <div class="space-y-4">
+       <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+        <div class="relative">
+         <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input type="text" id="reg-name" placeholder="Enter your full name" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+        </div>
+       </div>
+       <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+        <div class="relative">
+         <i data-lucide="phone" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input type="tel" id="reg-phone" placeholder="Enter phone number" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+        </div>
+       </div>
+       <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Location / Address</label>
+        <div class="relative">
+         <i data-lucide="map-pin" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input type="text" id="reg-location" placeholder="Enter your delivery address" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+        </div>
+       </div>
+       <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+        <div class="relative">
+         <i data-lucide="at-sign" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input type="text" id="reg-username" placeholder="Choose a username" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+        </div>
+       </div>
+       <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+        <div class="relative">
+         <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input type="password" id="reg-password" placeholder="Create a password" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+        </div>
+       </div>
+      </div><button type="submit" id="register-btn" class="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transition"> Create Account </button>
+      <p class="text-center text-sm text-gray-500 mt-4">Already have an account? <button type="button" onclick="switchAuthMode('login')" class="text-green-600 font-semibold hover:underline">Login here</button></p>
+     </form><!-- Message Display -->
+     <div id="message-box" class="hidden mt-4 p-4 rounded-xl text-center font-semibold"></div>
+    </div>
+   </section><!-- User Dashboard -->
+   <section id="user-dashboard" class="min-h-full px-4 py-20 hidden">
+    <div class="max-w-4xl mx-auto fade-in">
+     <div class="flex items-center justify-between mb-8">
+      <div>
+       <h1 class="text-3xl font-bold text-green-800">Welcome, <span id="user-name">Customer</span>!</h1>
+       <p class="text-gray-600">Your milk delivery dashboard</p>
+      </div><button onclick="logout()" class="flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-4 py-2 rounded-xl transition"> <i data-lucide="log-out" class="w-5 h-5"></i> Logout </button>
+     </div>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="glass-card rounded-2xl p-6 border border-green-100">
+       <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+         <i data-lucide="droplets" class="w-6 h-6 text-green-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-green-800">Your Profile</h3>
+       </div>
+       <div id="user-profile-info" class="space-y-2 text-gray-600">
+        <!-- Populated dynamically -->
+       </div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-amber-100">
+       <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+         <i data-lucide="calendar" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-amber-800">Delivery Status</h3>
+       </div>
+       <p class="text-gray-600">Your daily milk delivery is scheduled!</p>
+       <div class="mt-4 p-3 bg-green-50 rounded-xl flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i> <span class="text-green-700 font-semibold">Active Subscription</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Admin Dashboard -->
+   <section id="admin-dashboard" class="min-h-full px-4 py-20 hidden">
+    <div class="max-w-6xl mx-auto fade-in">
+     <div class="flex items-center justify-between mb-8">
+      <div>
+       <h1 class="text-3xl font-bold text-amber-800">Supplier Dashboard</h1>
+       <p class="text-gray-600">Manage your customers and deliveries</p>
+      </div><button onclick="logout()" class="flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-4 py-2 rounded-xl transition"> <i data-lucide="log-out" class="w-5 h-5"></i> Logout </button>
+     </div><!-- Stats -->
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="glass-card rounded-2xl p-5 border border-green-100">
+       <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+         <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+        </div>
+        <div>
+         <p class="text-sm text-gray-500">Total Customers</p>
+         <p id="total-customers" class="text-2xl font-bold text-green-800">0</p>
+        </div>
+       </div>
+      </div>
+      <div class="glass-card rounded-2xl p-5 border border-amber-100">
+       <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+         <i data-lucide="truck" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div>
+         <p class="text-sm text-gray-500">Today's Deliveries</p>
+         <p id="today-deliveries" class="text-2xl font-bold text-amber-800">0</p>
+        </div>
+       </div>
+      </div>
+      <div class="glass-card rounded-2xl p-5 border border-blue-100">
+       <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+         <i data-lucide="shield" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div>
+         <p class="text-sm text-gray-500">Total Suppliers</p>
+         <p id="total-admins" class="text-2xl font-bold text-blue-800">0</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Customer List -->
+     <div class="glass-card rounded-2xl p-6 border border-green-100">
+      <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center gap-2"><i data-lucide="users" class="w-6 h-6"></i> Registered Customers</h3>
+      <div id="customer-list" class="space-y-3">
+       <p class="text-gray-500 text-center py-8">No customers registered yet</p>
+      </div>
+     </div>
+    </div>
+   </section>
+  </div>
+  <script>
+    let currentPage = 'start';
+    let currentRole = 'user';
+    let authMode = 'login';
+    let allUsers = [];
+    let loggedInUser = null;
+
+    const defaultConfig = {
+      app_title: 'MilkMate',
+      tagline: 'Fresh From Farm to Your Doorstep',
+      background_color: '#e0f2fe',
+      surface_color: '#ffffff',
+      text_color: '#166534',
+      primary_action_color: '#16a34a',
+      secondary_action_color: '#059669'
+    };
+
+    let config = JSON.parse(JSON.stringify(defaultConfig));
+
+    var sdkReady = false;
+
+    var dataHandler = {
+      onDataChanged: function(data) {
+        allUsers = data || [];
+        updateDashboards();
+      }
+    };
+
+    function initElementSdk() {
+      try {
+        if (!window.elementSdk) {
+          applyConfig();
+          return;
+        }
+        
+        window.elementSdk.init({
+          defaultConfig: defaultConfig,
+          onConfigChange: function(cfg) {
+            config = Object.assign({}, defaultConfig, cfg);
+            applyConfig();
+          },
+          mapToCapabilities: function(cfg) {
+            return {
+              recolorables: [
+                {
+                  get: function() { return cfg.background_color || defaultConfig.background_color; },
+                  set: function(v) { cfg.background_color = v; if (window.elementSdk && window.elementSdk.setConfig) window.elementSdk.setConfig({ background_color: v }); }
+                },
+                {
+                  get: function() { return cfg.surface_color || defaultConfig.surface_color; },
+                  set: function(v) { cfg.surface_color = v; if (window.elementSdk && window.elementSdk.setConfig) window.elementSdk.setConfig({ surface_color: v }); }
+                },
+                {
+                  get: function() { return cfg.text_color || defaultConfig.text_color; },
+                  set: function(v) { cfg.text_color = v; if (window.elementSdk && window.elementSdk.setConfig) window.elementSdk.setConfig({ text_color: v }); }
+                },
+                {
+                  get: function() { return cfg.primary_action_color || defaultConfig.primary_action_color; },
+                  set: function(v) { cfg.primary_action_color = v; if (window.elementSdk && window.elementSdk.setConfig) window.elementSdk.setConfig({ primary_action_color: v }); }
+                },
+                {
+                  get: function() { return cfg.secondary_action_color || defaultConfig.secondary_action_color; },
+                  set: function(v) { cfg.secondary_action_color = v; if (window.elementSdk && window.elementSdk.setConfig) window.elementSdk.setConfig({ secondary_action_color: v }); }
+                }
+              ],
+              borderables: [],
+              fontEditable: undefined,
+              fontSizeable: undefined
+            };
+          },
+          mapToEditPanelValues: function(cfg) {
+            var map = new Map();
+            map.set('app_title', cfg.app_title || defaultConfig.app_title);
+            map.set('tagline', cfg.tagline || defaultConfig.tagline);
+            return map;
+          }
+        });
+        
+        if (window.elementSdk && window.elementSdk.config) {
+          config = Object.assign({}, defaultConfig, window.elementSdk.config);
+        }
+        applyConfig();
+      } catch(e) {
+        applyConfig();
+      }
+    }
+
+    function applyConfig() {
+      var title = config.app_title || defaultConfig.app_title;
+      var tagline = config.tagline || defaultConfig.tagline;
+      
+      var titleEl = document.getElementById('main-title');
+      var navTitleEl = document.getElementById('nav-title');
+      var taglineEl = document.getElementById('main-tagline');
+      
+      if (titleEl) titleEl.textContent = title;
+      if (navTitleEl) navTitleEl.textContent = title;
+      if (taglineEl) taglineEl.textContent = tagline;
+    }
+
+    function showPage(page) {
+      var pages = ['start-page', 'login-page', 'user-dashboard', 'admin-dashboard'];
+      pages.forEach(function(p) {
+        var el = document.getElementById(p);
+        if (el) el.classList.add('hidden');
+      });
+      
+      var pageEl = document.getElementById(page + '-page');
+      var dashEl = document.getElementById(page + '-dashboard');
+      if (pageEl) pageEl.classList.remove('hidden');
+      if (dashEl) dashEl.classList.remove('hidden');
+      
+      var nav = document.getElementById('main-nav');
+      if (page === 'start') {
+        if (nav) nav.classList.add('hidden');
+      } else {
+        if (nav) nav.classList.remove('hidden');
+      }
+      
+      currentPage = page;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function switchRole(role) {
+      currentRole = role;
+      var userTab = document.getElementById('user-tab');
+      var adminTab = document.getElementById('admin-tab');
+      var formTitle = document.getElementById('form-title');
+      var regFormTitle = document.getElementById('register-form-title');
+      
+      if (role === 'user') {
+        if (userTab) {
+          userTab.classList.add('bg-green-600', 'text-white');
+          userTab.classList.remove('text-gray-600', 'hover:bg-gray-100');
+        }
+        if (adminTab) {
+          adminTab.classList.remove('bg-amber-600', 'text-white');
+          adminTab.classList.add('text-gray-600', 'hover:bg-gray-100');
+        }
+        if (formTitle) formTitle.textContent = 'Customer Login';
+        if (regFormTitle) regFormTitle.textContent = 'Customer Registration';
+      } else {
+        if (adminTab) {
+          adminTab.classList.add('bg-amber-600', 'text-white');
+          adminTab.classList.remove('text-gray-600', 'hover:bg-gray-100');
+        }
+        if (userTab) {
+          userTab.classList.remove('bg-green-600', 'text-white');
+          userTab.classList.add('text-gray-600', 'hover:bg-gray-100');
+        }
+        if (formTitle) formTitle.textContent = 'Supplier Login';
+        if (regFormTitle) regFormTitle.textContent = 'Supplier Registration';
+      }
+    }
+
+    function switchAuthMode(mode) {
+      authMode = mode;
+      var loginTab = document.getElementById('login-tab');
+      var registerTab = document.getElementById('register-tab');
+      var loginForm = document.getElementById('login-form');
+      var registerForm = document.getElementById('register-form');
+      
+      if (mode === 'login') {
+        if (loginTab) {
+          loginTab.classList.add('border-green-600', 'text-green-700');
+          loginTab.classList.remove('border-transparent', 'text-gray-400');
+        }
+        if (registerTab) {
+          registerTab.classList.remove('border-green-600', 'text-green-700');
+          registerTab.classList.add('border-transparent', 'text-gray-400');
+        }
+        if (loginForm) loginForm.classList.remove('hidden');
+        if (registerForm) registerForm.classList.add('hidden');
+      } else {
+        if (registerTab) {
+          registerTab.classList.add('border-green-600', 'text-green-700');
+          registerTab.classList.remove('border-transparent', 'text-gray-400');
+        }
+        if (loginTab) {
+          loginTab.classList.remove('border-green-600', 'text-green-700');
+          loginTab.classList.add('border-transparent', 'text-gray-400');
+        }
+        if (registerForm) registerForm.classList.remove('hidden');
+        if (loginForm) loginForm.classList.add('hidden');
+      }
+      hideMessage();
+    }
+
+    function showMessage(msg, isError) {
+      var box = document.getElementById('message-box');
+      if (!box) return;
+      box.textContent = msg;
+      var className = isError ? 'mt-4 p-4 rounded-xl text-center font-semibold bg-red-100 text-red-700' : 'mt-4 p-4 rounded-xl text-center font-semibold bg-green-100 text-green-700';
+      box.className = className;
+      box.classList.remove('hidden');
+      setTimeout(function() {
+        if (box) box.classList.add('hidden');
+      }, 3000);
+    }
+
+    function hideMessage() {
+      var box = document.getElementById('message-box');
+      if (box) box.classList.add('hidden');
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      
+      var name = (document.getElementById('reg-name').value || '').trim();
+      var phone = (document.getElementById('reg-phone').value || '').trim();
+      var location = (document.getElementById('reg-location').value || '').trim();
+      var username = (document.getElementById('reg-username').value || '').trim();
+      var password = (document.getElementById('reg-password').value || '').trim();
+      
+      if (!name || !phone || !location || !username || !password) {
+        showMessage('Please fill in all fields', true);
+        return;
+      }
+      
+      var existingUser = allUsers.find(function(u) { return u.username === username; });
+      if (existingUser) {
+        showMessage('Username already exists', true);
+        return;
+      }
+      
+      if (allUsers.length >= 999) {
+        showMessage('Maximum users reached. Please contact support.', true);
+        return;
+      }
+      
+      var newUser = {
+        type: currentRole,
+        name: name,
+        phone: phone,
+        location: location,
+        username: username,
+        password: password,
+        createdAt: new Date().toISOString()
+      };
+      
+      var regBtn = document.getElementById('register-btn');
+      if (regBtn) {
+        regBtn.disabled = true;
+        regBtn.textContent = 'Creating...';
+      }
+      
+      if (window.dataSdk) {
+        window.dataSdk.create(newUser).then(function(result) {
+          if (regBtn) {
+            regBtn.disabled = false;
+            regBtn.textContent = 'Create Account';
+          }
+          
+          if (result.isOk) {
+            showMessage('Account created successfully! Please login.');
+            document.getElementById('reg-name').value = '';
+            document.getElementById('reg-phone').value = '';
+            document.getElementById('reg-location').value = '';
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+            setTimeout(function() { switchAuthMode('login'); }, 1500);
+          } else {
+            showMessage('Registration failed. Please try again.', true);
+          }
+        }).catch(function(err) {
+          if (regBtn) {
+            regBtn.disabled = false;
+            regBtn.textContent = 'Create Account';
+          }
+          showMessage('Registration failed. Please try again.', true);
+        });
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      
+      var username = (document.getElementById('login-username').value || '').trim();
+      var password = (document.getElementById('login-password').value || '').trim();
+      
+      if (!username || !password) {
+        showMessage('Please enter username and password', true);
+        return;
+      }
+      
+      var user = allUsers.find(function(u) { 
+        return u.username === username && u.password === password && u.type === currentRole; 
+      });
+      
+      if (user) {
+        loggedInUser = user;
+        showMessage('Login successful!');
+        
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        
+        setTimeout(function() {
+          if (currentRole === 'user') {
+            showUserDashboard();
+          } else {
+            showAdminDashboard();
+          }
+        }, 1000);
+      } else {
+        showMessage('Invalid credentials or wrong account type', true);
+      }
+    }
+
+    function showUserDashboard() {
+      showPage('user');
+      var userNameEl = document.getElementById('user-name');
+      if (userNameEl) userNameEl.textContent = loggedInUser.name;
+      
+      var profileInfo = document.getElementById('user-profile-info');
+      if (profileInfo) {
+        profileInfo.innerHTML = '<p><span class="font-semibold">Name:</span> ' + loggedInUser.name + '</p>' +
+          '<p><span class="font-semibold">Phone:</span> ' + loggedInUser.phone + '</p>' +
+          '<p><span class="font-semibold">Address:</span> ' + loggedInUser.location + '</p>' +
+          '<p><span class="font-semibold">Username:</span> ' + loggedInUser.username + '</p>';
+      }
+    }
+
+    function showAdminDashboard() {
+      showPage('admin');
+      updateDashboards();
+    }
+
+    function updateDashboards() {
+      var customers = allUsers.filter(function(u) { return u.type === 'user'; });
+      var admins = allUsers.filter(function(u) { return u.type === 'admin'; });
+      
+      var totalCustomersEl = document.getElementById('total-customers');
+      var todayDeliveriesEl = document.getElementById('today-deliveries');
+      var totalAdminsEl = document.getElementById('total-admins');
+      
+      if (totalCustomersEl) totalCustomersEl.textContent = customers.length;
+      if (todayDeliveriesEl) todayDeliveriesEl.textContent = customers.length;
+      if (totalAdminsEl) totalAdminsEl.textContent = admins.length;
+      
+      var customerList = document.getElementById('customer-list');
+      if (!customerList) return;
+      
+      if (customers.length === 0) {
+        customerList.innerHTML = '<p class="text-gray-500 text-center py-8">No customers registered yet</p>';
+      } else {
+        var html = '';
+        customers.forEach(function(c) {
+          html += '<div class="flex items-center justify-between p-4 bg-green-50 rounded-xl">' +
+            '<div class="flex items-center gap-3">' +
+            '<div class="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">' +
+            '<i data-lucide="user" class="w-5 h-5 text-green-700"></i>' +
+            '</div>' +
+            '<div>' +
+            '<p class="font-bold text-green-800">' + c.name + '</p>' +
+            '<p class="text-sm text-gray-600">' + c.phone + ' • ' + c.location + '</p>' +
+            '</div>' +
+            '</div>' +
+            '<div class="flex items-center gap-2 text-green-600">' +
+            '<i data-lucide="check-circle" class="w-5 h-5"></i>' +
+            '<span class="text-sm font-semibold">Active</span>' +
+            '</div>' +
+            '</div>';
+        });
+        customerList.innerHTML = html;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function logout() {
+      loggedInUser = null;
+      showPage('start');
+    }
+
+    function initApp() {
+      try {
+        var loginForm = document.getElementById('login-form');
+        var registerForm = document.getElementById('register-form');
+        
+        if (loginForm) {
+          loginForm.addEventListener('submit', handleLogin);
+        }
+        if (registerForm) {
+          registerForm.addEventListener('submit', handleRegister);
+        }
+        
+        if (window.dataSdk && typeof window.dataSdk.init === 'function') {
+          window.dataSdk.init(dataHandler);
+          sdkReady = true;
+        }
+        
+        initElementSdk();
+        
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      } catch(e) {
+        console.error('Init error:', e);
+        initElementSdk();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      setTimeout(initApp, 100);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9db97d06034847da',t:'MTc3MzM4ODY1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
