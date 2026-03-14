@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --surface: rgba(255,255,255,.9);
+      --text: #163328;
+      --muted: #6a7f74;
+      --line: rgba(18,54,41,.1);
+      --primary: #1f7a5a;
+      --primary-strong: #14543d;
+      --primary-soft: #dff2ea;
+      --danger: #c84f4f;
+      --sidebar-width: 272px;
+      --radius: 24px;
+      --shadow: 0 24px 60px rgba(18,54,41,.1);
+    }
+    body {
+      font-family: Manrope, sans-serif;
+      background: radial-gradient(circle at top left, rgba(112,191,154,.18), transparent 26%), linear-gradient(180deg, #eef5ea 0%, #f9fbf8 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #1a4a3a 0%, #0a1f17 100%);
+      color: #fff;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 20;
+    }
+    .brand, .card {
+      border-radius: var(--radius);
+    }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f4fffb, #9fe1c0);
+      color: var(--primary-strong);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .nav-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 18px;
+      color: rgba(255,255,255,.82);
+      transition: .2s ease;
+      text-decoration: none;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,.1);
+      color: #fff;
+    }
+    .nav-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .main {
+      margin-left: var(--sidebar-width);
+      padding: 28px;
+      min-height: 100vh;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.72);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+    }
+    .customer-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: #e7f7ef;
+      color: #16653f;
+      border: 1px solid rgba(22,101,63,.18);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .button {
+      border: 0;
+      border-radius: 16px;
+      padding: 11px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .button.danger { background: linear-gradient(135deg, #d45b5b 0%, #b93c3c 100%); color: #fff; }
+    .hero {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-family: "Instrument Serif", serif;
+      font-size: clamp(2.2rem, 4vw, 3.3rem);
+      line-height: .95;
+      font-weight: 400;
+    }
+    .hero p { margin-top: 10px; color: var(--muted); }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .card span { color: var(--muted); font-size: 13px; font-weight: 700; }
+    .card strong {
+      display: block;
+      font-size: 22px;
+      color: var(--primary-strong);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+    .muted { color: var(--muted); font-size: 12px; }
+    .table-card {
+      margin-top: 22px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .table-card h3 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .next-day-edit {
+      margin-top: 12px;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #f7fcf9;
+      display: grid;
+      gap: 8px;
+    }
+    .next-day-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .qty-input {
+      width: 160px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(18,54,41,.18);
+      background: #fff;
+      font: inherit;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      margin-top: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(18,54,41,.08);
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      background: #f9fcfa;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status-delivered { background: #e7f7ef; color: #16653f; }
+    .status-skipped { background: #fceceb; color: #a33f3f; }
+    @media (max-width: 1080px) {
+      .cards { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 980px) {
+      .sidebar { position: static; width: 100%; }
+      .main { margin-left: 0; padding: 18px; }
+    }
+    @media (max-width: 700px) {
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">M</div>
+      <div>
+        <strong>MilkMate</strong>
+        <div class="muted" style="color:rgba(220,244,234,.68);font-size:13px;margin-top:3px">Customer dashboard</div>
+      </div>
+    </div>
+    <nav>
+      <a class="nav-item" href="cust_dash.html"><div class="nav-icon">D</div><div>Dashboard</div></a>
+      <a class="nav-item active" href="cust_del.html"><div class="nav-icon">MD</div><div>My Delivery</div></a>
+      <a class="nav-item" href="cust_bills.html"><div class="nav-icon">MB</div><div>My Bills</div></a>
+      <a class="nav-item" href="msg.html"><div class="nav-icon">MA</div><div>Message Admin</div></a>
+      <a class="nav-item" id="sidebarLogout" href="#"><div class="nav-icon">LO</div><div>Logout</div></a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="customer-meta">
+        <span id="customerName">Customer</span>
+        <div class="avatar" id="avatar">CU</div>
+      </div>
+      <button class="button danger" id="topLogout">Logout</button>
+    </header>
+
+    <section class="hero">
+      <h1 id="welcomeText">Welcome back, Customer</h1>
+      <p>Assigned profile and weekly schedule are loaded automatically from admin records.</p>
+    </section>
+
+    <section class="cards">
+      <article class="card">
+        <span>Milk Type</span>
+        <strong id="milkTypeValue">Cow Milk</strong>
+        <small class="muted">Assigned by admin</small>
+      </article>
+      <article class="card">
+        <span>Building</span>
+        <strong id="buildingValue">Main Building</strong>
+        <small class="muted">Delivery location</small>
+      </article>
+      <article class="card">
+        <span>Weekly Delivery Schedule</span>
+        <strong id="weeklyScheduleValue">Mon-Sun: 1 L</strong>
+        <small class="muted">From weekly delivery table</small>
+      </article>
+      <article class="card">
+        <span>Default Daily Quantity</span>
+        <strong id="defaultQtyValue">1 L</strong>
+        <small class="muted">Fallback quantity</small>
+      </article>
+      <article class="card">
+        <span>Current Week / Day</span>
+        <strong id="todaySlotValue">Week 1 / Day 1 (1 L)</strong>
+        <small class="muted">Live calendar mapping</small>
+      </article>
+      <article class="card">
+        <span>Service Status</span>
+        <strong id="statusValue">Active</strong>
+        <small class="muted">Current customer status</small>
+      </article>
+    </section>
+
+    <section class="table-card">
+      <h3>My Delivery (Weekly)</h3>
+      <p class="muted">Weekly delivery data is read from admin delivery table in localStorage.</p>
+      <div class="next-day-edit">
+        <strong id="nextDayLabel">Next Day Delivery</strong>
+        <div class="next-day-controls">
+          <input id="nextDayQtyInput" class="qty-input" type="number" min="0" step="0.1" value="1">
+          <button type="button" class="button" id="saveNextDayButton">Save Next Day</button>
+        </div>
+        <small class="muted" id="nextDayHint">Set quantity for tomorrow and save.</small>
+      </div>
+      <div class="table-wrap">
+        <table aria-label="Weekly milk delivery">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Milk Quantity</th>
+              <th>Delivery Status</th>
+            </tr>
+          </thead>
+          <tbody id="weeklyDeliveryBody">
+            <tr><td>Monday</td><td>1 L</td><td><span class="status-pill status-delivered">Delivered</span></td></tr>
+            <tr><td>Tuesday</td><td>1 L</td><td><span class="status-pill status-delivered">Delivered</span></td></tr>
+            <tr><td>Wednesday</td><td>0 L</td><td><span class="status-pill status-skipped">Skipped</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const CUSTOMER_STORAGE_KEYS = ["milkmate-customers", "milkmate_customers"];
+    const DELIVERY_STORAGE_KEY = "milkmate-delivery-records";
+    const USERS_STORAGE_KEY = "milkmate-users";
+    const LINKED_CUSTOMER_ID_KEY = "milkmate-linked-customer-id";
+    const ROLE_KEY = "loggedInRole";
+    const SESSION_KEY = "milkmate-session-user";
+    const LOGIN_PAGE = "index.html";
+    const DEFAULTS = {
+      milkType: "Cow Milk",
+      building: "Main Building",
+      quantityValue: 1,
+      status: "Active"
+    };
+    let currentRenderState = {
+      assigned: null,
+      defaultQty: 1,
+      nextContext: null
+    };
+
+    function safeParse(raw, fallbackValue) {
+      try {
+        return raw ? JSON.parse(raw) : fallbackValue;
+      } catch (error) {
+        return fallbackValue;
+      }
+    }
+
+    function initials(name) {
+      return String(name || "")
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(function(part) { return part[0].toUpperCase(); })
+        .join("") || "CU";
+    }
+
+    function getSessionUser() {
+      return safeParse(localStorage.getItem(SESSION_KEY), null);
+    }
+
+    function getUserProfile(sessionUser) {
+      if (!sessionUser) return null;
+      const users = safeParse(localStorage.getItem(USERS_STORAGE_KEY), []);
+      if (!Array.isArray(users)) return sessionUser;
+
+      const match = users.find(function(user) {
+        const sameId = String(user && user.id || "") === String(sessionUser.id || "");
+        const sameUsername = String(user && user.username || "") === String(sessionUser.username || "");
+        const sameType = String(user && user.type || "") === String(sessionUser.type || "");
+        return sameId || (sameUsername && sameType);
+      });
+
+      if (!match) return sessionUser;
+      return {
+        id: match.id,
+        username: match.username,
+        type: match.type,
+        name: match.name,
+        phone: match.phone
+      };
+    }
+
+    function getCustomers() {
+      let customers = [];
+      CUSTOMER_STORAGE_KEYS.some(function(key) {
+        const parsed = safeParse(localStorage.getItem(key), []);
+        if (Array.isArray(parsed) && parsed.length) {
+          customers = parsed;
+          return true;
+        }
+        return false;
+      });
+
+      return customers.map(function(item) {
+        return {
+          id: String(item && (item.id || item.customerId) || ""),
+          customerName: String(item && (item.customerName || item.name || item.username) || ""),
+          phoneNumber: String(item && (item.phoneNumber || item.phone) || ""),
+          milkType: String(item && (item.milkType || item.milk) || ""),
+          building: String(item && (item.building || item.buildingName) || ""),
+          quantityValue: Number(item && item.quantityValue ? item.quantityValue : 0),
+          status: String(item && item.status ? item.status : "Active")
+        };
+      });
+    }
+
+    function getDeliveryRecords() {
+      const records = safeParse(localStorage.getItem(DELIVERY_STORAGE_KEY), []);
+      if (!Array.isArray(records)) return [];
+      return records.map(function(item) {
+        return {
+          customerId: String(item && (item.customerId || item.id) || ""),
+          customerName: String(item && (item.customerName || item.name) || ""),
+          year: String(item && item.year ? item.year : ""),
+          month: String(item && item.month ? item.month : ""),
+          week: String(item && item.week ? item.week : ""),
+          day1: Number(item && item.day1 ? item.day1 : 0),
+          day2: Number(item && item.day2 ? item.day2 : 0),
+          day3: Number(item && item.day3 ? item.day3 : 0),
+          day4: Number(item && item.day4 ? item.day4 : 0),
+          day5: Number(item && item.day5 ? item.day5 : 0),
+          day6: Number(item && item.day6 ? item.day6 : 0),
+          day7: Number(item && item.day7 ? item.day7 : 0)
+        };
+      });
+    }
+
+    function digitsOnly(value) {
+      return String(value || "").replace(/\D/g, "");
+    }
+
+    function findAssignedCustomer(sessionUser, customers) {
+      if (!sessionUser) return null;
+
+      const linkedCustomerId = String(localStorage.getItem(LINKED_CUSTOMER_ID_KEY) || "");
+      if (linkedCustomerId) {
+        const byLinkedId = customers.find(function(customer) {
+          return String(customer.id || "") === linkedCustomerId;
+        });
+        if (byLinkedId) return byLinkedId;
+      }
+
+      const targetPhone = digitsOnly(sessionUser.phone);
+      const targetName = String(sessionUser.name || "").trim().toLowerCase();
+      const targetUsername = String(sessionUser.username || "").trim().toLowerCase();
+
+      if (targetPhone) {
+        const byPhone = customers.find(function(customer) {
+          return digitsOnly(customer.phoneNumber) === targetPhone;
+        });
+        if (byPhone) {
+          if (byPhone.id) localStorage.setItem(LINKED_CUSTOMER_ID_KEY, String(byPhone.id));
+          return byPhone;
+        }
+      }
+
+      if (targetName) {
+        const byName = customers.find(function(customer) {
+          return String(customer.customerName || "").trim().toLowerCase() === targetName;
+        });
+        if (byName) {
+          if (byName.id) localStorage.setItem(LINKED_CUSTOMER_ID_KEY, String(byName.id));
+          return byName;
+        }
+      }
+
+      if (targetUsername) {
+        const byUsernameAsName = customers.find(function(customer) {
+          return String(customer.customerName || "").trim().toLowerCase() === targetUsername;
+        });
+        if (byUsernameAsName) {
+          if (byUsernameAsName.id) localStorage.setItem(LINKED_CUSTOMER_ID_KEY, String(byUsernameAsName.id));
+          return byUsernameAsName;
+        }
+      }
+
+      return null;
+    }
+
+    function currentWeekAndDay() {
+      const now = new Date();
+      return contextFromDate(now);
+    }
+
+    function contextFromDate(dateValue) {
+      const now = new Date(dateValue);
+      const date = now.getDate();
+      return {
+        year: String(now.getFullYear()),
+        month: [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ][now.getMonth()],
+        week: String(Math.ceil(Math.min(date, 28) / 7)),
+        dayIndex: Math.min(((date - 1) % 7) + 1, 7)
+      };
+    }
+
+    function nextDayContext() {
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      return contextFromDate(tomorrow);
+    }
+
+    function findWeeklyRecord(customer, records, context) {
+      if (!customer) return null;
+      const targetId = String(customer.id || "");
+      const targetName = String(customer.customerName || "").toLowerCase();
+
+      const exact = records.find(function(record) {
+        const idMatch = targetId && record.customerId === targetId;
+        const nameMatch = targetName && record.customerName.toLowerCase() === targetName;
+        const samePeriod = record.year === context.year && record.month === context.month && record.week === context.week;
+        return samePeriod && (idMatch || nameMatch);
+      });
+      if (exact) return exact;
+
+      const anyMatch = records.filter(function(record) {
+        const idMatch = targetId && record.customerId === targetId;
+        const nameMatch = targetName && record.customerName.toLowerCase() === targetName;
+        return idMatch || nameMatch;
+      });
+      if (!anyMatch.length) return null;
+      return anyMatch[anyMatch.length - 1];
+    }
+
+    function formatWeekSchedule(record, fallbackQty) {
+      if (!record) {
+        if (fallbackQty > 0) return "Mon-Sun: " + fallbackQty + " L";
+        return "Mon-Sun: 1 L";
+      }
+      const days = [record.day1, record.day2, record.day3, record.day4, record.day5, record.day6, record.day7];
+      const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      return labels.map(function(label, index) {
+        return label + ": " + days[index] + "L";
+      }).join(" | ");
+    }
+
+    function getCurrentDayQuantity(record, fallbackQty, dayIndex) {
+      if (!record) return fallbackQty > 0 ? fallbackQty + " L" : "1 L";
+      const value = Number(record["day" + dayIndex] || 0);
+      return value + " L";
+    }
+
+    function dayRowsFromRecord(record, fallbackQty) {
+      const labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const fallback = Number(fallbackQty || 0);
+      const values = record
+        ? [record.day1, record.day2, record.day3, record.day4, record.day5, record.day6, record.day7]
+        : [fallback, fallback, fallback, fallback, fallback, fallback, fallback];
+
+      return labels.map(function(label, index) {
+        const qty = Number(values[index] || 0);
+        const delivered = qty > 0;
+        return {
+          day: label,
+          quantity: qty + " L",
+          statusText: delivered ? "Delivered" : "Skipped",
+          statusClass: delivered ? "status-delivered" : "status-skipped"
+        };
+      });
+    }
+
+    function renderWeeklyDeliveryTable(record, fallbackQty) {
+      const body = document.getElementById("weeklyDeliveryBody");
+      const rows = dayRowsFromRecord(record, fallbackQty);
+      body.innerHTML = rows.map(function(row) {
+        return "<tr>" +
+          "<td>" + row.day + "</td>" +
+          "<td>" + row.quantity + "</td>" +
+          "<td><span class=\"status-pill " + row.statusClass + "\">" + row.statusText + "</span></td>" +
+          "</tr>";
+      }).join("");
+    }
+
+    function dayNameByIndex(index) {
+      return ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][Math.max(0, Number(index || 1) - 1)] || "Day";
+    }
+
+    function setNextDayHint(text, isError) {
+      const hint = document.getElementById("nextDayHint");
+      hint.textContent = text;
+      hint.style.color = isError ? "#a33f3f" : "#6a7f74";
+    }
+
+    function findRecordIndexForContext(customer, records, context) {
+      const targetId = String(customer && customer.id || "");
+      const targetName = String(customer && customer.customerName || "").toLowerCase();
+      return records.findIndex(function(record) {
+        const recordName = String(record && (record.customerName || record.name) || "").toLowerCase();
+        const idMatch = targetId && String(record && (record.customerId || record.id) || "") === targetId;
+        const nameMatch = targetName && recordName === targetName;
+        const samePeriod = String(record && record.year || "") === context.year &&
+          String(record && record.month || "") === context.month &&
+          String(record && record.week || "") === context.week;
+        return samePeriod && (idMatch || nameMatch);
+      });
+    }
+
+    function renderNextDayEditor(customer, defaultQty, records) {
+      const next = nextDayContext();
+      const dayName = dayNameByIndex(next.dayIndex);
+      const label = document.getElementById("nextDayLabel");
+      const input = document.getElementById("nextDayQtyInput");
+
+      currentRenderState = {
+        assigned: customer,
+        defaultQty: defaultQty,
+        nextContext: next
+      };
+
+      label.textContent = "Next Day (" + dayName + ") - Week " + next.week + ", " + next.month + " " + next.year;
+      if (!customer) {
+        input.value = Number(defaultQty || 1);
+        setNextDayHint("Customer profile not linked yet.", true);
+        return;
+      }
+
+      const index = findRecordIndexForContext(customer, records, next);
+      if (index === -1) {
+        input.value = Number(defaultQty || 1);
+        setNextDayHint("No saved record for next day yet. Saving will create one.", false);
+        return;
+      }
+
+      const nextValue = Number(records[index]["day" + next.dayIndex] || 0);
+      input.value = nextValue;
+      setNextDayHint("This value comes from the admin delivery table.", false);
+    }
+
+    function saveNextDayDelivery() {
+      const input = document.getElementById("nextDayQtyInput");
+      const qty = Math.max(0, Number(input.value || 0));
+      const customer = currentRenderState.assigned;
+      const context = currentRenderState.nextContext;
+      if (!customer || !context) {
+        setNextDayHint("Customer not found. Please login again.", true);
+        return;
+      }
+
+      const records = safeParse(localStorage.getItem(DELIVERY_STORAGE_KEY), []);
+      if (!Array.isArray(records)) {
+        setNextDayHint("Delivery storage is invalid.", true);
+        return;
+      }
+
+      const index = findRecordIndexForContext(customer, records, context);
+      if (index === -1) {
+        const newRecord = {
+          customerId: String(customer.id || ""),
+          customerName: String(customer.customerName || ""),
+          year: context.year,
+          month: context.month,
+          week: context.week,
+          day1: 0, day2: 0, day3: 0, day4: 0, day5: 0, day6: 0, day7: 0
+        };
+        newRecord["day" + context.dayIndex] = qty;
+        records.push(newRecord);
+      } else {
+        records[index]["day" + context.dayIndex] = qty;
+      }
+
+      localStorage.setItem(DELIVERY_STORAGE_KEY, JSON.stringify(records));
+      setNextDayHint("Next day quantity saved. Admin delivery table will show this value.", false);
+      render();
+    }
+
+    function canAccessAsCustomer() {
+      const role = localStorage.getItem(ROLE_KEY);
+      if (role === "customer") return true;
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        const session = raw ? JSON.parse(raw) : null;
+        if (session && session.type === "user") {
+          localStorage.setItem(ROLE_KEY, "customer");
+          return true;
+        }
+      } catch (error) {}
+      return false;
+    }
+
+    function render() {
+      const sessionUser = getSessionUser();
+      const userProfile = getUserProfile(sessionUser);
+      const customers = getCustomers();
+      const assigned = findAssignedCustomer(userProfile, customers);
+      const context = currentWeekAndDay();
+      const records = getDeliveryRecords();
+      const weeklyRecord = findWeeklyRecord(assigned, records, context);
+
+      const customerName = assigned
+        ? assigned.customerName
+        : (userProfile && (userProfile.name || userProfile.username) ? (userProfile.name || userProfile.username) : "Customer");
+
+      const milkType = assigned && assigned.milkType ? assigned.milkType : DEFAULTS.milkType;
+      const building = assigned && assigned.building ? assigned.building : DEFAULTS.building;
+      const qty = assigned && Number(assigned.quantityValue) > 0 ? Number(assigned.quantityValue) : DEFAULTS.quantityValue;
+      const status = assigned && assigned.status ? assigned.status : DEFAULTS.status;
+
+      document.getElementById("customerName").textContent = customerName;
+      document.getElementById("avatar").textContent = initials(customerName);
+      document.getElementById("welcomeText").textContent = "Welcome back, " + customerName;
+
+      document.getElementById("milkTypeValue").textContent = milkType;
+      document.getElementById("buildingValue").textContent = building;
+      document.getElementById("weeklyScheduleValue").textContent = formatWeekSchedule(weeklyRecord, qty);
+      document.getElementById("defaultQtyValue").textContent = qty + " L";
+      document.getElementById("todaySlotValue").textContent = "Week " + context.week + " / Day " + context.dayIndex + " (" + getCurrentDayQuantity(weeklyRecord, qty, context.dayIndex) + ")";
+      document.getElementById("statusValue").textContent = status;
+      renderWeeklyDeliveryTable(weeklyRecord, qty);
+      renderNextDayEditor(assigned, qty, records);
+    }
+
+    function logout(event) {
+      if (event) event.preventDefault();
+      localStorage.removeItem(ROLE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(LINKED_CUSTOMER_ID_KEY);
+      window.location.href = LOGIN_PAGE;
+    }
+
+    document.getElementById("topLogout").addEventListener("click", logout);
+    document.getElementById("sidebarLogout").addEventListener("click", logout);
+    document.getElementById("saveNextDayButton").addEventListener("click", saveNextDayDelivery);
+
+    window.addEventListener("focus", render);
+    window.addEventListener("pageshow", render);
+    window.addEventListener("storage", function(event) {
+      if (
+        event.key === DELIVERY_STORAGE_KEY ||
+        event.key === USERS_STORAGE_KEY ||
+        event.key === CUSTOMER_STORAGE_KEYS[0] ||
+        event.key === CUSTOMER_STORAGE_KEYS[1]
+      ) {
+        render();
+      }
+    });
+
+    canAccessAsCustomer();
+    render();
+  </script>
+</body>
+</html>
